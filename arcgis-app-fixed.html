@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Master Data Explorer - AI-Powered GeoID Analysis</title>
+    
+    <!-- ArcGIS JavaScript API -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/dark/main.css">
+    <script src="https://js.arcgis.com/4.28/"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #viewDiv {
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .panel-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .filter-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .filter-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .metric-button {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .metric-button:hover {
+            background: #2a2a2a;
+            border-color: #00d4ff;
+        }
+        
+        .metric-button.active {
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            border-color: #00d4ff;
+        }
+        
+        .ai-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .ai-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .ai-quiz-question {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 150px;
+        }
+        
+        .quiz-option {
+            display: block;
+            padding: 10px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .ai-insights {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        
+        .search-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .search-results {
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .search-result-item {
+            padding: 10px;
+            background: #1a1a1a;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .search-result-item:hover {
+            background: #2a2a2a;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #333;
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .export-button {
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .export-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading ALICE Master Database</h2>
+            <p>Preparing 80,000+ GeoID records...</p>
+        </div>
+    </div>
+    
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message">
+        <strong>Data Loading Error</strong>
+        <p>Unable to load the ALICE database. Please ensure alice_master_database.json is in the same directory.</p>
+    </div>
+    
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by GeoID, County, City...">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+    
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <div class="panel-header">ALICE Master Data Explorer</div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRecords">79,964</div>
+                <div class="stat-label">Total GeoID Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgCombined">41.5%</div>
+                <div class="stat-label">National ALICE+Poverty</div>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">Geographic Level</div>
+            <select id="geoLevelFilter" onchange="applyFilters()">
+                <option value="all">All Levels</option>
+                <option value="county">County (19,876)</option>
+                <option value="subcounty">Subcounty/City (60,088)</option>
+            </select>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">State Filter</div>
+            <select id="stateFilter" onchange="applyFilters()">
+                <option value="all">All States (32)</option>
+            </select>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">Data Visualization</div>
+            <div id="metricButtons">
+                <span class="metric-button active" data-metric="combined">Combined Rate</span>
+                <span class="metric-button" data-metric="poverty">Poverty Rate</span>
+                <span class="metric-button" data-metric="alice">ALICE Rate</span>
+                <span class="metric-button" data-metric="households">Total Households</span>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">Threshold Filters</div>
+            <label>Min Combined Rate (%)</label>
+            <input type="range" id="minCombinedRate" min="0" max="100" value="0" oninput="updateRangeLabel(this, 'minRateLabel')">
+            <span id="minRateLabel">0%</span>
+            
+            <label>Min Households</label>
+            <input type="range" id="minHouseholds" min="0" max="50000" value="0" oninput="updateRangeLabel(this, 'minHouseholdsLabel', true)">
+            <span id="minHouseholdsLabel">0</span>
+        </div>
+        
+        <!-- AI Section -->
+        <div class="ai-section">
+            <div class="ai-title">🤖 AI Analysis & Quiz</div>
+            
+            <div class="ai-quiz-question" id="quizQuestion">
+                <p>Loading quiz...</p>
+            </div>
+            
+            <button class="export-button" onclick="startNewQuiz()">Start New Quiz</button>
+            
+            <div class="ai-insights">
+                <strong>AI Insights:</strong>
+                <p id="aiInsights">Loading AI analysis...</p>
+            </div>
+        </div>
+        
+        <button class="export-button" onclick="exportFilteredData()">Export Filtered Data (CSV)</button>
+    </div>
+    
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-title">Combined ALICE + Poverty Rate</div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #00ff00"></div>
+            <span>&lt; 30% - Low Impact</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffff00"></div>
+            <span>30-40% - Moderate</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9900"></div>
+            <span>40-50% - High</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff0000"></div>
+            <span>&gt; 50% - Critical</span>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let aliceData = [];
+        let map, view, featureLayer;
+        let currentVisualization = 'combined';
+        let currentQuizData = null;
+        
+        // Initialize application
+        async function initApp() {
+            try {
+                // Load ALICE data first
+                await loadALICEData();
+                
+                // Then initialize map
+                initializeMap();
+                
+                // Setup event listeners
+                setupEventListeners();
+                
+                // Generate initial insights and quiz
+                generateAIInsights();
+                setTimeout(startNewQuiz, 1000);
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError();
+            }
+        }
+        
+        // Load ALICE data
+        async function loadALICEData() {
+            try {
+                const response = await fetch('alice_master_database.json');
+                if (!response.ok) throw new Error('Failed to load data');
+                
+                aliceData = await response.json();
+                console.log(`Loaded ${aliceData.length} ALICE records`);
+                
+                // Populate filters
+                populateFilters();
+                
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading ALICE data:', error);
+                throw error;
+            }
+        }
+        
+        // Initialize map with ArcGIS
+        function initializeMap() {
+            require([
+                "esri/Map",
+                "esri/views/MapView",
+                "esri/layers/FeatureLayer",
+                "esri/Graphic",
+                "esri/geometry/Point",
+                "esri/symbols/SimpleMarkerSymbol",
+                "esri/renderers/ClassBreaksRenderer",
+                "esri/PopupTemplate",
+                "esri/layers/support/Field"
+            ], function(
+                Map, MapView, FeatureLayer, Graphic, Point, SimpleMarkerSymbol,
+                ClassBreaksRenderer, PopupTemplate, Field
+            ) {
+                // Create map
+                map = new Map({
+                    basemap: "dark-gray-vector"
+                });
+                
+                // Create view
+                view = new MapView({
+                    container: "viewDiv",
+                    map: map,
+                    center: [-98.5795, 39.8283],
+                    zoom: 4
+                });
+                
+                // Create feature layer from data
+                const graphics = createGraphics(Graphic, Point);
+                
+                featureLayer = new FeatureLayer({
+                    source: graphics,
+                    objectIdField: "ObjectID",
+                    fields: createFields(Field),
+                    popupTemplate: createPopupTemplate(PopupTemplate),
+                    renderer: createRenderer(SimpleMarkerSymbol, ClassBreaksRenderer, 'combined')
+                });
+                
+                map.add(featureLayer);
+                
+                // Store references globally
+                window.mapObjects = {
+                    Map, MapView, FeatureLayer, Graphic, Point,
+                    SimpleMarkerSymbol, ClassBreaksRenderer, PopupTemplate, Field
+                };
+            });
+        }
+        
+        // Create graphics from data
+        function createGraphics(Graphic, Point) {
+            return aliceData.slice(0, 5000).map((record, index) => {
+                // Generate coordinates (in production, use real geocoding)
+                const longitude = -98.5795 + (Math.random() - 0.5) * 50;
+                const latitude = 39.8283 + (Math.random() - 0.5) * 20;
+                
+                return new Graphic({
+                    geometry: new Point({
+                        longitude: longitude,
+                        latitude: latitude
+                    }),
+                    attributes: {
+                        ObjectID: index,
+                        geoID: record.geoID,
+                        geoLevel: record.geoLevel,
+                        locationName: record.geoDisplayLabel || record.county || 'Unknown',
+                        state: record.state,
+                        totalHouseholds: record.totalHouseholds,
+                        povertyRate: parseFloat(record.povertyRate) || 0,
+                        aliceRate: parseFloat(record.aliceRate) || 0,
+                        combinedRate: parseFloat(record.combinedRate) || 0
+                    }
+                });
+            });
+        }
+        
+        // Create fields definition
+        function createFields(Field) {
+            return [
+                new Field({ name: "ObjectID", type: "oid" }),
+                new Field({ name: "geoID", type: "string" }),
+                new Field({ name: "geoLevel", type: "string" }),
+                new Field({ name: "locationName", type: "string" }),
+                new Field({ name: "state", type: "string" }),
+                new Field({ name: "totalHouseholds", type: "integer" }),
+                new Field({ name: "povertyRate", type: "double" }),
+                new Field({ name: "aliceRate", type: "double" }),
+                new Field({ name: "combinedRate", type: "double" })
+            ];
+        }
+        
+        // Create popup template
+        function createPopupTemplate(PopupTemplate) {
+            return new PopupTemplate({
+                title: "{locationName}",
+                content: [
+                    {
+                        type: "fields",
+                        fieldInfos: [
+                            { fieldName: "geoID", label: "GeoID" },
+                            { fieldName: "state", label: "State" },
+                            { fieldName: "totalHouseholds", label: "Total Households", format: { digitSeparator: true } },
+                            { fieldName: "povertyRate", label: "Poverty Rate (%)", format: { places: 1 } },
+                            { fieldName: "aliceRate", label: "ALICE Rate (%)", format: { places: 1 } },
+                            { fieldName: "combinedRate", label: "Combined Rate (%)", format: { places: 1 } }
+                        ]
+                    }
+                ]
+            });
+        }
+        
+        // Create renderer
+        function createRenderer(SimpleMarkerSymbol, ClassBreaksRenderer, field) {
+            return new ClassBreaksRenderer({
+                field: field + "Rate",
+                classBreakInfos: [
+                    {
+                        minValue: 0,
+                        maxValue: 30,
+                        symbol: new SimpleMarkerSymbol({
+                            color: "#00ff00",
+                            size: 8,
+                            outline: { color: "white", width: 1 }
+                        })
+                    },
+                    {
+                        minValue: 30,
+                        maxValue: 40,
+                        symbol: new SimpleMarkerSymbol({
+                            color: "#ffff00",
+                            size: 10,
+                            outline: { color: "white", width: 1 }
+                        })
+                    },
+                    {
+                        minValue: 40,
+                        maxValue: 50,
+                        symbol: new SimpleMarkerSymbol({
+                            color: "#ff9900",
+                            size: 12,
+                            outline: { color: "white", width: 1 }
+                        })
+                    },
+                    {
+                        minValue: 50,
+                        maxValue: 100,
+                        symbol: new SimpleMarkerSymbol({
+                            color: "#ff0000",
+                            size: 14,
+                            outline: { color: "white", width: 2 }
+                        })
+                    }
+                ]
+            });
+        }
+        
+        // Populate filter dropdowns
+        function populateFilters() {
+            const states = [...new Set(aliceData.map(d => d.state))].sort();
+            const stateSelect = document.getElementById('stateFilter');
+            
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                stateSelect.appendChild(option);
+            });
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+            
+            // Metric buttons
+            document.querySelectorAll('.metric-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    updateVisualization(this.dataset.metric);
+                });
+            });
+        }
+        
+        // Handle search
+        function handleSearch(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (searchTerm.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            
+            const results = aliceData.filter(d => 
+                (d.geoID && d.geoID.toString().includes(searchTerm)) ||
+                (d.geoDisplayLabel && d.geoDisplayLabel.toLowerCase().includes(searchTerm)) ||
+                (d.county && d.county.toLowerCase().includes(searchTerm))
+            ).slice(0, 10);
+            
+            resultsDiv.innerHTML = results.map(r => `
+                <div class="search-result-item">
+                    <strong>${r.geoDisplayLabel || r.county || 'Unknown'}</strong><br>
+                    <small>GeoID: ${r.geoID} | ${r.state}</small><br>
+                    <small>Combined: ${r.combinedRate}%</small>
+                </div>
+            `).join('');
+        }
+        
+        // Update visualization
+        function updateVisualization(metric) {
+            currentVisualization = metric;
+            
+            // Update button states
+            document.querySelectorAll('.metric-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.metric === metric);
+            });
+            
+            // Update map renderer if available
+            if (window.mapObjects && featureLayer) {
+                const { SimpleMarkerSymbol, ClassBreaksRenderer } = window.mapObjects;
+                featureLayer.renderer = createRenderer(SimpleMarkerSymbol, ClassBreaksRenderer, metric);
+            }
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            if (!featureLayer) return;
+            
+            const geoLevel = document.getElementById('geoLevelFilter').value;
+            const state = document.getElementById('stateFilter').value;
+            const minRate = parseFloat(document.getElementById('minCombinedRate').value);
+            const minHouseholds = parseInt(document.getElementById('minHouseholds').value);
+            
+            let expression = "1=1";
+            
+            if (geoLevel !== 'all') {
+                expression += ` AND geoLevel = '${geoLevel}'`;
+            }
+            if (state !== 'all') {
+                expression += ` AND state = '${state}'`;
+            }
+            if (minRate > 0) {
+                expression += ` AND combinedRate >= ${minRate}`;
+            }
+            if (minHouseholds > 0) {
+                expression += ` AND totalHouseholds >= ${minHouseholds}`;
+            }
+            
+            featureLayer.definitionExpression = expression;
+        }
+        
+        // Update range labels
+        function updateRangeLabel(input, labelId, formatNumber = false) {
+            const label = document.getElementById(labelId);
+            if (formatNumber) {
+                label.textContent = parseInt(input.value).toLocaleString();
+            } else {
+                label.textContent = input.value + '%';
+            }
+            applyFilters();
+        }
+        
+        // Generate AI insights
+        function generateAIInsights() {
+            if (!aliceData.length) return;
+            
+            const insights = [];
+            
+            // High risk areas
+            const highRisk = aliceData.filter(d => parseFloat(d.combinedRate) > 50);
+            if (highRisk.length > 0) {
+                insights.push(`Critical: ${highRisk.length} locations exceed 50% combined rate`);
+            }
+            
+            // National average
+            const avgCombined = aliceData.reduce((sum, d) => sum + parseFloat(d.combinedRate || 0), 0) / aliceData.length;
+            insights.push(`National average: ${avgCombined.toFixed(1)}% households below ALICE threshold`);
+            
+            // Update display
+            document.getElementById('aiInsights').innerHTML = insights.join('<br><br>');
+        }
+        
+        // Quiz functionality
+        function startNewQuiz() {
+            if (!aliceData.length) {
+                document.getElementById('quizQuestion').innerHTML = '<p>Loading data...</p>';
+                return;
+            }
+            
+            const quizTypes = [
+                () => generateHighestRateQuiz(),
+                () => generateComparisonQuiz(),
+                () => generateCountQuiz()
+            ];
+            
+            const selectedQuiz = quizTypes[Math.floor(Math.random() * quizTypes.length)]();
+            currentQuizData = selectedQuiz;
+            
+            document.getElementById('quizQuestion').innerHTML = `
+                <p>${selectedQuiz.question}</p>
+                <div>
+                    ${selectedQuiz.options.map((opt, i) => `
+                        <div class="quiz-option" onclick="checkAnswer(${i})">
+                            ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function generateHighestRateQuiz() {
+            const counties = aliceData.filter(d => d.geoLevel === 'county' && d.combinedRate);
+            const sorted = counties.sort((a, b) => parseFloat(b.combinedRate) - parseFloat(a.combinedRate));
+            const correct = sorted[0];
+            
+            const options = [correct];
+            for (let i = 1; i < 4 && i < sorted.length; i++) {
+                options.push(sorted[Math.floor(Math.random() * sorted.length)]);
+            }
+            
+            options.sort(() => Math.random() - 0.5);
+            
+            return {
+                question: "Which county has the highest combined ALICE + Poverty rate?",
+                options: options.map(o => `${o.county || o.geoDisplayLabel}, ${o.state}`),
+                correctIndex: options.findIndex(o => o.geoID === correct.geoID),
+                explanation: `${correct.county || correct.geoDisplayLabel}, ${correct.state} has ${correct.combinedRate}%`
+            };
+        }
+        
+        function generateComparisonQuiz() {
+            const states = [...new Set(aliceData.map(d => d.state))];
+            const state1 = states[Math.floor(Math.random() * states.length)];
+            const state2 = states[Math.floor(Math.random() * states.length)];
+            
+            const state1Avg = aliceData
+                .filter(d => d.state === state1)
+                .reduce((sum, d) => sum + parseFloat(d.combinedRate || 0), 0) / 
+                aliceData.filter(d => d.state === state1).length;
+            
+            const state2Avg = aliceData
+                .filter(d => d.state === state2)
+                .reduce((sum, d) => sum + parseFloat(d.combinedRate || 0), 0) / 
+                aliceData.filter(d => d.state === state2).length;
+            
+            return {
+                question: `Which state has a higher average combined rate?`,
+                options: [state1, state2],
+                correctIndex: state1Avg > state2Avg ? 0 : 1,
+                explanation: `${state1Avg > state2Avg ? state1 : state2} has the higher average`
+            };
+        }
+        
+        function generateCountQuiz() {
+            const threshold = 40 + Math.floor(Math.random() * 20);
+            const count = aliceData.filter(d => parseFloat(d.combinedRate || 0) > threshold).length;
+            
+            const options = [
+                Math.floor(count * 0.7),
+                count,
+                Math.floor(count * 1.3),
+                Math.floor(count * 1.5)
+            ].sort(() => Math.random() - 0.5);
+            
+            return {
+                question: `How many locations have a combined rate above ${threshold}%?`,
+                options: options,
+                correctIndex: options.indexOf(count),
+                explanation: `${count} locations exceed ${threshold}%`
+            };
+        }
+        
+        function checkAnswer(index) {
+            if (!currentQuizData) return;
+            
+            const isCorrect = index === currentQuizData.correctIndex;
+            alert(isCorrect ? `Correct! ${currentQuizData.explanation}` : `Incorrect. ${currentQuizData.explanation}`);
+            
+            setTimeout(startNewQuiz, 1000);
+        }
+        
+        // Export functionality
+        function exportFilteredData() {
+            const filtered = aliceData.slice(0, 1000); // Limit for demo
+            
+            const csv = [
+                Object.keys(filtered[0]).join(','),
+                ...filtered.map(row => Object.values(row).map(v => JSON.stringify(v || '')).join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alice_export_${Date.now()}.csv`;
+            a.click();
+        }
+        
+        // Show error
+        function showError() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+        
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
