@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Master Data Explorer - AI-Powered GeoID Analysis</title>
+    
+    <!-- ArcGIS JavaScript API -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/dark/main.css">
+    <script src="https://js.arcgis.com/4.28/"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- TensorFlow.js for AI features -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #viewDiv {
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .panel-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .filter-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .filter-title {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .metric-button {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 5px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .metric-button:hover {
+            background: #2a2a2a;
+            border-color: #00d4ff;
+        }
+        
+        .metric-button.active {
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            border-color: #00d4ff;
+        }
+        
+        .ai-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .ai-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .ai-quiz-question {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .quiz-option {
+            display: block;
+            padding: 10px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        .ai-insights {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        
+        .search-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .search-results {
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .search-result-item {
+            padding: 10px;
+            background: #1a1a1a;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .search-result-item:hover {
+            background: #2a2a2a;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #333;
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .popup-content {
+            max-width: 400px;
+        }
+        
+        .popup-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+        
+        .popup-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .popup-stat-label {
+            color: #888;
+        }
+        
+        .popup-stat-value {
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        #chartContainer {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            width: 400px;
+            height: 300px;
+            display: none;
+        }
+        
+        .export-button {
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .export-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2>Loading ALICE Master Database</h2>
+            <p>Preparing 80,000+ GeoID records...</p>
+        </div>
+    </div>
+    
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by GeoID, County, City...">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+    
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <div class="panel-header">ALICE Master Data Explorer</div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRecords">79,964</div>
+                <div class="stat-label">Total GeoID Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgCombined">41.5%</div>
+                <div class="stat-label">National ALICE+Poverty</div>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">Geographic Level</div>
+            <select id="geoLevelFilter">
+                <option value="all">All Levels</option>
+                <option value="county">County (19,876)</option>
+                <option value="subcounty">Subcounty/City (60,088)</option>
+                <option value="tract">Census Tract</option>
+            </select>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">State Filter</div>
+            <select id="stateFilter">
+                <option value="all">All States (32)</option>
+            </select>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">Data Visualization</div>
+            <div>
+                <span class="metric-button active" onclick="updateVisualization('combined')">Combined Rate</span>
+                <span class="metric-button" onclick="updateVisualization('poverty')">Poverty Rate</span>
+                <span class="metric-button" onclick="updateVisualization('alice')">ALICE Rate</span>
+                <span class="metric-button" onclick="updateVisualization('households')">Total Households</span>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-title">Threshold Filters</div>
+            <label>Min Combined Rate (%)</label>
+            <input type="range" id="minCombinedRate" min="0" max="100" value="0">
+            <span id="minRateLabel">0%</span>
+            
+            <label>Min Households</label>
+            <input type="range" id="minHouseholds" min="0" max="50000" value="0">
+            <span id="minHouseholdsLabel">0</span>
+        </div>
+        
+        <!-- AI Section -->
+        <div class="ai-section">
+            <div class="ai-title">🤖 AI Analysis & Quiz</div>
+            
+            <div class="ai-quiz-question" id="quizQuestion">
+                <p>Which county has the highest combined ALICE + Poverty rate?</p>
+                <div id="quizOptions"></div>
+            </div>
+            
+            <button class="export-button" onclick="startAIQuiz()">Start New Quiz</button>
+            
+            <div class="ai-insights">
+                <strong>AI Insights:</strong>
+                <p id="aiInsights">Loading AI analysis...</p>
+            </div>
+        </div>
+        
+        <button class="export-button" onclick="exportData()">Export Filtered Data (CSV)</button>
+    </div>
+    
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-title">Combined ALICE + Poverty Rate</div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #00ff00"></div>
+            <span>&lt; 30% - Low Impact</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffff00"></div>
+            <span>30-40% - Moderate</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff9900"></div>
+            <span>40-50% - High</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff0000"></div>
+            <span>&gt; 50% - Critical</span>
+        </div>
+    </div>
+    
+    <!-- Chart Container -->
+    <div id="chartContainer">
+        <canvas id="analysisChart"></canvas>
+    </div>
+    
+    <script src="arcgis-app.js"></script>
+</body>
+</html>
