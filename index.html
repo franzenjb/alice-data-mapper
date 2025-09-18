@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Data Interactive Map - Asset Limited, Income Constrained, Employed</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            height: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .state-info {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .state-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .poverty-fill {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .alice-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .combined-fill {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .charts-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 1em;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        select {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            font-size: 1em;
+            background: white;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .state-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .state-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .state-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ALICE Data Interactive Map</h1>
+            <div class="subtitle">Asset Limited, Income Constrained, Employed - State-by-State Analysis</div>
+            
+            <div class="stats-grid" id="nationalStats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalStates">32</div>
+                    <div class="stat-label">States Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgPoverty">--%</div>
+                    <div class="stat-label">Avg Poverty Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgAlice">--%</div>
+                    <div class="stat-label">Avg ALICE Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgCombined">--%</div>
+                    <div class="stat-label">Avg Combined Rate</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button class="filter-btn active" onclick="updateMapView('combined')">Combined Rate</button>
+                <button class="filter-btn" onclick="updateMapView('poverty')">Poverty Rate</button>
+                <button class="filter-btn" onclick="updateMapView('alice')">ALICE Rate</button>
+                <select id="sortSelect" onchange="updateStateList()">
+                    <option value="combined">Sort by Combined Rate</option>
+                    <option value="poverty">Sort by Poverty Rate</option>
+                    <option value="alice">Sort by ALICE Rate</option>
+                    <option value="name">Sort by State Name</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="legend">
+                    <div class="legend-title">Rate Ranges</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2ECC71"></div>
+                        <span>&lt; 35% - Low</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F39C12"></div>
+                        <span>35-40% - Moderate</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E67E22"></div>
+                        <span>40-45% - High</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E74C3C"></div>
+                        <span>&gt; 45% - Very High</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="state-info" id="stateInfo">
+                    <div class="state-name">Select a State</div>
+                    <p>Click on a state on the map or select from the list below to view detailed information.</p>
+                </div>
+                
+                <h3>State Rankings</h3>
+                <div class="state-list" id="stateList">
+                    <div class="loading">Loading states...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="charts-container">
+            <h2>National Analysis</h2>
+            <div class="chart-grid">
+                <div>
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div>
+                    <canvas id="scatterChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

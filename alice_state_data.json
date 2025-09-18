@@ -1,0 +1,482 @@
+[
+  {
+    "id": "alabama",
+    "name": "Alabama",
+    "abbreviation": "AL",
+    "povertyRate": 15,
+    "aliceRate": 28,
+    "combinedRate": 43,
+    "url": "https://www.unitedforalice.org/alabama",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1289331,
+    "survivalBudget": {
+      "single": 29067,
+      "family": 70463
+    }
+  },
+  {
+    "id": "arkansas",
+    "name": "Arkansas",
+    "abbreviation": "AR",
+    "povertyRate": 16,
+    "aliceRate": 29,
+    "combinedRate": 45,
+    "url": "https://www.unitedforalice.org/arkansas",
+    "dataYear": 2023,
+    "estimatedHouseholds": 2242436,
+    "survivalBudget": {
+      "single": 27373,
+      "family": 60449
+    }
+  },
+  {
+    "id": "colorado",
+    "name": "Colorado",
+    "abbreviation": "CO",
+    "povertyRate": 9,
+    "aliceRate": 26,
+    "combinedRate": 35,
+    "url": "https://www.unitedforalice.org/colorado",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1732962,
+    "survivalBudget": {
+      "single": 34802,
+      "family": 60960
+    }
+  },
+  {
+    "id": "connecticut",
+    "name": "Connecticut",
+    "abbreviation": "CT",
+    "povertyRate": 10,
+    "aliceRate": 30,
+    "combinedRate": 40,
+    "url": "https://www.unitedforalice.org/connecticut",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1359435,
+    "survivalBudget": {
+      "single": 31210,
+      "family": 79578
+    }
+  },
+  {
+    "id": "delaware",
+    "name": "Delaware",
+    "abbreviation": "DE",
+    "povertyRate": 11,
+    "aliceRate": 27,
+    "combinedRate": 38,
+    "url": "https://www.unitedforalice.org/delaware",
+    "dataYear": 2023,
+    "estimatedHouseholds": 600659,
+    "survivalBudget": {
+      "single": 25842,
+      "family": 77761
+    }
+  },
+  {
+    "id": "florida",
+    "name": "Florida",
+    "abbreviation": "FL",
+    "povertyRate": 13,
+    "aliceRate": 33,
+    "combinedRate": 46,
+    "url": "https://www.unitedforalice.org/florida",
+    "dataYear": 2023,
+    "estimatedHouseholds": 2074629,
+    "survivalBudget": {
+      "single": 34272,
+      "family": 75200
+    }
+  },
+  {
+    "id": "georgia",
+    "name": "Georgia",
+    "abbreviation": "GA",
+    "povertyRate": 14,
+    "aliceRate": 31,
+    "combinedRate": 45,
+    "url": "https://www.unitedforalice.org/georgia",
+    "dataYear": 2023,
+    "estimatedHouseholds": 2029873,
+    "survivalBudget": {
+      "single": 32924,
+      "family": 60686
+    }
+  },
+  {
+    "id": "hawaii",
+    "name": "Hawai'i",
+    "abbreviation": "HI",
+    "povertyRate": 9,
+    "aliceRate": 33,
+    "combinedRate": 42,
+    "url": "https://www.unitedforalice.org/hawaii",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1075779,
+    "survivalBudget": {
+      "single": 26466,
+      "family": 79956
+    }
+  },
+  {
+    "id": "idaho",
+    "name": "Idaho",
+    "abbreviation": "ID",
+    "povertyRate": 11,
+    "aliceRate": 29,
+    "combinedRate": 40,
+    "url": "https://www.unitedforalice.org/idaho",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1731036,
+    "survivalBudget": {
+      "single": 28026,
+      "family": 60378
+    }
+  },
+  {
+    "id": "illinois",
+    "name": "Illinois",
+    "abbreviation": "IL",
+    "povertyRate": 12,
+    "aliceRate": 30,
+    "combinedRate": 42,
+    "url": "https://www.unitedforalice.org/illinois",
+    "dataYear": 2023,
+    "estimatedHouseholds": 2335282,
+    "survivalBudget": {
+      "single": 28011,
+      "family": 62412
+    }
+  },
+  {
+    "id": "indiana",
+    "name": "Indiana",
+    "abbreviation": "IN",
+    "povertyRate": 12,
+    "aliceRate": 28,
+    "combinedRate": 40,
+    "url": "https://www.unitedforalice.org/indiana",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1780914,
+    "survivalBudget": {
+      "single": 26884,
+      "family": 62149
+    }
+  },
+  {
+    "id": "iowa",
+    "name": "Iowa",
+    "abbreviation": "IA",
+    "povertyRate": 11,
+    "aliceRate": 25,
+    "combinedRate": 36,
+    "url": "https://www.unitedforalice.org/iowa",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1446245,
+    "survivalBudget": {
+      "single": 29455,
+      "family": 78139
+    }
+  },
+  {
+    "id": "kansas",
+    "name": "Kansas",
+    "abbreviation": "KS",
+    "povertyRate": 12,
+    "aliceRate": 26,
+    "combinedRate": 38,
+    "url": "https://www.unitedforalice.org/kansas",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1101110,
+    "survivalBudget": {
+      "single": 27933,
+      "family": 70865
+    }
+  },
+  {
+    "id": "louisiana",
+    "name": "Louisiana",
+    "abbreviation": "LA",
+    "povertyRate": 19,
+    "aliceRate": 29,
+    "combinedRate": 48,
+    "url": "https://www.unitedforalice.org/louisiana",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1547204,
+    "survivalBudget": {
+      "single": 27478,
+      "family": 63070
+    }
+  },
+  {
+    "id": "maine",
+    "name": "Maine",
+    "abbreviation": "ME",
+    "povertyRate": 11,
+    "aliceRate": 29,
+    "combinedRate": 40,
+    "url": "https://www.unitedforalice.org/maine",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1401841,
+    "survivalBudget": {
+      "single": 34042,
+      "family": 63385
+    }
+  },
+  {
+    "id": "maryland",
+    "name": "Maryland",
+    "abbreviation": "MD",
+    "povertyRate": 9,
+    "aliceRate": 29,
+    "combinedRate": 38,
+    "url": "https://www.unitedforalice.org/maryland",
+    "dataYear": 2023,
+    "estimatedHouseholds": 855144,
+    "survivalBudget": {
+      "single": 29892,
+      "family": 72842
+    }
+  },
+  {
+    "id": "michigan",
+    "name": "Michigan",
+    "abbreviation": "MI",
+    "povertyRate": 14,
+    "aliceRate": 28,
+    "combinedRate": 42,
+    "url": "https://www.unitedforalice.org/michigan",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1161602,
+    "survivalBudget": {
+      "single": 30250,
+      "family": 75819
+    }
+  },
+  {
+    "id": "minnesota",
+    "name": "Minnesota",
+    "abbreviation": "MN",
+    "povertyRate": 9,
+    "aliceRate": 23,
+    "combinedRate": 32,
+    "url": "https://www.unitedforalice.org/minnesota",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1400966,
+    "survivalBudget": {
+      "single": 29876,
+      "family": 72730
+    }
+  },
+  {
+    "id": "mississippi",
+    "name": "Mississippi",
+    "abbreviation": "MS",
+    "povertyRate": 19,
+    "aliceRate": 31,
+    "combinedRate": 50,
+    "url": "https://www.unitedforalice.org/mississippi",
+    "dataYear": 2023,
+    "estimatedHouseholds": 524327,
+    "survivalBudget": {
+      "single": 27573,
+      "family": 66517
+    }
+  },
+  {
+    "id": "new-jersey",
+    "name": "New Jersey",
+    "abbreviation": "NJ",
+    "povertyRate": 10,
+    "aliceRate": 31,
+    "combinedRate": 41,
+    "url": "https://www.unitedforalice.org/new-jersey",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1902250,
+    "survivalBudget": {
+      "single": 28714,
+      "family": 70533
+    }
+  },
+  {
+    "id": "new-mexico",
+    "name": "New Mexico",
+    "abbreviation": "NM",
+    "povertyRate": 18,
+    "aliceRate": 29,
+    "combinedRate": 47,
+    "url": "https://www.unitedforalice.org/new-mexico",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1740014,
+    "survivalBudget": {
+      "single": 27866,
+      "family": 61756
+    }
+  },
+  {
+    "id": "new-york",
+    "name": "New York",
+    "abbreviation": "NY",
+    "povertyRate": 14,
+    "aliceRate": 31,
+    "combinedRate": 45,
+    "url": "https://www.unitedforalice.org/new-york",
+    "dataYear": 2023,
+    "estimatedHouseholds": 556976,
+    "survivalBudget": {
+      "single": 34536,
+      "family": 65512
+    }
+  },
+  {
+    "id": "north-carolina",
+    "name": "North Carolina",
+    "abbreviation": "NC",
+    "povertyRate": 14,
+    "aliceRate": 29,
+    "combinedRate": 43,
+    "url": "https://www.unitedforalice.org/north-carolina",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1192224,
+    "survivalBudget": {
+      "single": 28213,
+      "family": 77644
+    }
+  },
+  {
+    "id": "ohio",
+    "name": "Ohio",
+    "abbreviation": "OH",
+    "povertyRate": 13,
+    "aliceRate": 27,
+    "combinedRate": 40,
+    "url": "https://www.unitedforalice.org/ohio",
+    "dataYear": 2023,
+    "estimatedHouseholds": 533068,
+    "survivalBudget": {
+      "single": 27664,
+      "family": 61441
+    }
+  },
+  {
+    "id": "oregon",
+    "name": "Oregon",
+    "abbreviation": "OR",
+    "povertyRate": 12,
+    "aliceRate": 30,
+    "combinedRate": 42,
+    "url": "https://www.unitedforalice.org/oregon",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1897112,
+    "survivalBudget": {
+      "single": 34524,
+      "family": 61594
+    }
+  },
+  {
+    "id": "pennsylvania",
+    "name": "Pennsylvania",
+    "abbreviation": "PA",
+    "povertyRate": 12,
+    "aliceRate": 28,
+    "combinedRate": 40,
+    "url": "https://www.unitedforalice.org/pennsylvania",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1902123,
+    "survivalBudget": {
+      "single": 34390,
+      "family": 61543
+    }
+  },
+  {
+    "id": "south-carolina",
+    "name": "South Carolina",
+    "abbreviation": "SC",
+    "povertyRate": 14,
+    "aliceRate": 31,
+    "combinedRate": 45,
+    "url": "https://www.unitedforalice.org/south-carolina",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1084938,
+    "survivalBudget": {
+      "single": 30820,
+      "family": 74968
+    }
+  },
+  {
+    "id": "tennessee",
+    "name": "Tennessee",
+    "abbreviation": "TN",
+    "povertyRate": 14,
+    "aliceRate": 29,
+    "combinedRate": 43,
+    "url": "https://www.unitedforalice.org/tennessee",
+    "dataYear": 2023,
+    "estimatedHouseholds": 804519,
+    "survivalBudget": {
+      "single": 28852,
+      "family": 71292
+    }
+  },
+  {
+    "id": "texas",
+    "name": "Texas",
+    "abbreviation": "TX",
+    "povertyRate": 13,
+    "aliceRate": 29,
+    "combinedRate": 42,
+    "url": "https://www.unitedforalice.org/texas",
+    "dataYear": 2023,
+    "estimatedHouseholds": 1508489,
+    "survivalBudget": {
+      "single": 25126,
+      "family": 63350
+    }
+  },
+  {
+    "id": "virginia",
+    "name": "Virginia",
+    "abbreviation": "VA",
+    "povertyRate": 10,
+    "aliceRate": 29,
+    "combinedRate": 39,
+    "url": "https://www.unitedforalice.org/virginia",
+    "dataYear": 2023,
+    "estimatedHouseholds": 2451255,
+    "survivalBudget": {
+      "single": 28328,
+      "family": 71806
+    }
+  },
+  {
+    "id": "washington",
+    "name": "Washington",
+    "abbreviation": "WA",
+    "povertyRate": 10,
+    "aliceRate": 28,
+    "combinedRate": 38,
+    "url": "https://www.unitedforalice.org/washington",
+    "dataYear": 2023,
+    "estimatedHouseholds": 2024249,
+    "survivalBudget": {
+      "single": 25129,
+      "family": 67781
+    }
+  },
+  {
+    "id": "west-virginia",
+    "name": "West Virginia",
+    "abbreviation": "WV",
+    "povertyRate": 16,
+    "aliceRate": 29,
+    "combinedRate": 45,
+    "url": "https://www.unitedforalice.org/west-virginia",
+    "dataYear": 2023,
+    "estimatedHouseholds": 527915,
+    "survivalBudget": {
+      "single": 34671,
+      "family": 77612
+    }
+  }
+]
