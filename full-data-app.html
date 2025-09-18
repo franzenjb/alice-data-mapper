@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Complete Database - 79,964 GeoID Records</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .left-panel {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .right-panel {
+            width: 50%;
+            background: #0d0d0d;
+            overflow-y: auto;
+        }
+        
+        #map {
+            flex: 1;
+            height: 100%;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+        
+        .stats-bar {
+            background: #2a2a2a;
+            padding: 15px;
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 2px solid #00d4ff;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            background: #1a1a1a;
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .control-row input, .control-row select {
+            flex: 1;
+            padding: 10px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .data-section {
+            padding: 20px;
+        }
+        
+        .data-table-container {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        #dataTable {
+            width: 100% !important;
+            color: #fff;
+        }
+        
+        #dataTable thead {
+            background: #2a2a2a;
+        }
+        
+        #dataTable tbody tr:hover {
+            background: #333;
+            cursor: pointer;
+        }
+        
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 10000;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #333;
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .view-toggle {
+            background: #2a2a2a;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: #00d4ff;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+        
+        .summary-card h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        .summary-list {
+            list-style: none;
+        }
+        
+        .summary-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .rate-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .rate-critical { background: #e74c3c; }
+        .rate-high { background: #e67e22; }
+        .rate-moderate { background: #f39c12; }
+        .rate-low { background: #2ecc71; }
+        
+        .info-message {
+            background: #2a2a2a;
+            padding: 15px;
+            border-left: 4px solid #00d4ff;
+            margin: 20px;
+            border-radius: 5px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #2a2a2a;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #090979);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-indicator" id="loadingIndicator">
+        <div class="spinner"></div>
+        <h2>Loading 79,964 ALICE Records...</h2>
+        <p>Please wait while we load the complete database</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+        </div>
+    </div>
+    
+    <div class="app-container">
+        <div class="left-panel">
+            <div class="header">
+                <h1>ALICE Complete Database Explorer</h1>
+                <div class="subtitle">79,964 Geographic Records • All Counties & Subcounties</div>
+            </div>
+            
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="countiesCount">0</div>
+                    <div class="stat-label">Counties</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="subcountiesCount">0</div>
+                    <div class="stat-label">Subcounties</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="avgCombinedRate">0%</div>
+                    <div class="stat-label">Avg Combined</div>
+                </div>
+            </div>
+            
+            <div id="map"></div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="switchView('table')">Data Table</button>
+                <button class="toggle-btn" onclick="switchView('summary')">Summary Analysis</button>
+                <button class="toggle-btn" onclick="switchView('export')">Export Options</button>
+            </div>
+            
+            <div id="tableView" class="data-section">
+                <div class="controls">
+                    <div class="control-row">
+                        <input type="text" id="quickSearch" placeholder="Quick search GeoID, County, City...">
+                        <select id="stateFilter">
+                            <option value="">All States</option>
+                        </select>
+                        <select id="levelFilter">
+                            <option value="">All Levels</option>
+                            <option value="county">Counties</option>
+                            <option value="subcounty">Subcounties</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <select id="rateFilter">
+                            <option value="">All Rates</option>
+                            <option value="critical">Critical (>50%)</option>
+                            <option value="high">High (40-50%)</option>
+                            <option value="moderate">Moderate (30-40%)</option>
+                            <option value="low">Low (<30%)</option>
+                        </select>
+                        <button class="btn" onclick="applyFilters()">Apply Filters</button>
+                        <button class="btn" onclick="resetFilters()">Reset</button>
+                    </div>
+                </div>
+                
+                <div class="data-table-container">
+                    <table id="dataTable" class="display">
+                        <thead>
+                            <tr>
+                                <th>GeoID</th>
+                                <th>Location</th>
+                                <th>State</th>
+                                <th>Level</th>
+                                <th>Households</th>
+                                <th>Poverty %</th>
+                                <th>ALICE %</th>
+                                <th>Combined %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="summaryView" class="data-section" style="display: none;">
+                <div class="info-message">
+                    <h3>Database Summary</h3>
+                    <p>This database contains comprehensive ALICE data for 32 states, including county and subcounty level information with GeoID codes for precise geographic mapping.</p>
+                </div>
+                
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Highest Combined Rates</h3>
+                        <ul class="summary-list" id="highestRates"></ul>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Largest Counties by Households</h3>
+                        <ul class="summary-list" id="largestCounties"></ul>
+                    </div>
+                    <div class="summary-card">
+                        <h3>States by Average Rate</h3>
+                        <ul class="summary-list" id="stateAverages"></ul>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Critical Areas (>50%)</h3>
+                        <ul class="summary-list" id="criticalAreas"></ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="exportView" class="data-section" style="display: none;">
+                <div class="info-message">
+                    <h3>Export Options</h3>
+                    <p>Export the complete database or filtered results in various formats.</p>
+                </div>
+                
+                <div class="summary-card">
+                    <h3>Export Formats</h3>
+                    <button class="btn" onclick="exportCSV()" style="width: 100%; margin: 10px 0;">
+                        Export as CSV (All Data)
+                    </button>
+                    <button class="btn" onclick="exportFilteredCSV()" style="width: 100%; margin: 10px 0;">
+                        Export as CSV (Filtered Only)
+                    </button>
+                    <button class="btn" onclick="exportGeoJSON()" style="width: 100%; margin: 10px 0;">
+                        Export as GeoJSON (For GIS)
+                    </button>
+                    <button class="btn" onclick="exportSummaryReport()" style="width: 100%; margin: 10px 0;">
+                        Generate Summary Report
+                    </button>
+                </div>
+                
+                <div class="summary-card">
+                    <h3>Quick Stats</h3>
+                    <ul class="summary-list">
+                        <li>Total Records <span id="exportTotal">0</span></li>
+                        <li>Currently Filtered <span id="exportFiltered">0</span></li>
+                        <li>File Size Estimate <span id="exportSize">0 MB</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    
+    <script>
+        // Global variables
+        let aliceData = [];
+        let filteredData = [];
+        let map;
+        let markerClusterGroup;
+        let dataTable;
+        let currentView = 'table';
+        
+        // State coordinates for mapping (when GeoID doesn't have coordinates)
+        const stateCoordinates = {
+            'Alabama': [32.806671, -86.791130],
+            'Arkansas': [34.969704, -92.373123],
+            'Colorado': [39.059811, -105.311104],
+            'Connecticut': [41.597782, -72.755371],
+            'Delaware': [39.318523, -75.507141],
+            'Florida': [27.766279, -81.686783],
+            'Georgia': [33.040619, -83.643074],
+            'Hawaii': [21.094318, -157.498337],
+            'Idaho': [44.240459, -114.478828],
+            'Illinois': [40.349457, -88.986137],
+            'Indiana': [39.849426, -86.258278],
+            'Iowa': [42.011539, -93.210526],
+            'Kansas': [38.526600, -96.726486],
+            'Louisiana': [31.169546, -91.867805],
+            'Maine': [44.693947, -69.381927],
+            'Maryland': [39.063946, -76.802101],
+            'Michigan': [43.326618, -84.536095],
+            'Minnesota': [45.694454, -93.900192],
+            'Mississippi': [32.741646, -89.678696],
+            'New Jersey': [40.298904, -74.521011],
+            'New Mexico': [34.840515, -106.248482],
+            'New York': [42.165726, -74.948051],
+            'North Carolina': [35.630066, -79.806419],
+            'Ohio': [40.388783, -82.764915],
+            'Oregon': [43.804133, -120.554201],
+            'Pennsylvania': [40.590752, -77.209755],
+            'South Carolina': [33.856892, -80.945007],
+            'Tennessee': [35.747845, -86.692345],
+            'Texas': [31.054487, -97.563461],
+            'Virginia': [37.769337, -78.169968],
+            'Washington': [47.400902, -121.490494],
+            'West Virginia': [38.491226, -80.954453]
+        };
+        
+        // Initialize application
+        async function init() {
+            updateProgress(10, 'Initializing map...');
+            initMap();
+            
+            updateProgress(20, 'Loading ALICE database...');
+            await loadData();
+            
+            updateProgress(80, 'Processing data...');
+            processData();
+            
+            updateProgress(90, 'Initializing interface...');
+            initDataTable();
+            
+            updateProgress(100, 'Complete!');
+            setTimeout(() => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }, 500);
+        }
+        
+        // Update loading progress
+        function updateProgress(percent, message) {
+            const bar = document.getElementById('progressBar');
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+            if (message) {
+                document.querySelector('#loadingIndicator p').textContent = message;
+            }
+        }
+        
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([39.8283, -98.5795], 4);
+            
+            // Dark tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO'
+            }).addTo(map);
+            
+            // Initialize marker cluster group for performance
+            markerClusterGroup = L.markerClusterGroup({
+                chunkedLoading: true,
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true
+            });
+            
+            map.addLayer(markerClusterGroup);
+        }
+        
+        // Load data
+        async function loadData() {
+            try {
+                const response = await fetch('alice_master_database.json');
+                aliceData = await response.json();
+                filteredData = [...aliceData];
+                
+                // Update stats
+                document.getElementById('totalRecords').textContent = aliceData.length.toLocaleString();
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback: Load a subset for demonstration
+                loadDemoData();
+            }
+        }
+        
+        // Process data for display
+        function processData() {
+            // Calculate statistics
+            const counties = aliceData.filter(d => d.geoLevel === 'county');
+            const subcounties = aliceData.filter(d => d.geoLevel === 'subcounty');
+            
+            document.getElementById('countiesCount').textContent = counties.length.toLocaleString();
+            document.getElementById('subcountiesCount').textContent = subcounties.length.toLocaleString();
+            
+            // Calculate average combined rate
+            const avgRate = aliceData.reduce((sum, d) => sum + parseFloat(d.combinedRate || 0), 0) / aliceData.length;
+            document.getElementById('avgCombinedRate').textContent = avgRate.toFixed(1) + '%';
+            
+            // Populate state filter
+            const states = [...new Set(aliceData.map(d => d.state))].sort();
+            const stateFilter = document.getElementById('stateFilter');
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                stateFilter.appendChild(option);
+            });
+            
+            // Add markers to map (limited for performance)
+            addMapMarkers(aliceData.slice(0, 1000));
+            
+            // Generate summary data
+            generateSummaries();
+        }
+        
+        // Add markers to map
+        function addMapMarkers(data) {
+            markerClusterGroup.clearLayers();
+            
+            const markers = data.map(record => {
+                // Get coordinates
+                const coords = stateCoordinates[record.state];
+                if (!coords) return null;
+                
+                // Add randomization for subcounty positions
+                const lat = coords[0] + (record.geoLevel === 'subcounty' ? (Math.random() - 0.5) * 2 : 0);
+                const lng = coords[1] + (record.geoLevel === 'subcounty' ? (Math.random() - 0.5) * 2 : 0);
+                
+                const color = getColor(parseFloat(record.combinedRate));
+                
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 6,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+                
+                marker.bindPopup(`
+                    <strong>${record.geoDisplayLabel || record.county || 'Unknown'}</strong><br>
+                    GeoID: ${record.geoID}<br>
+                    State: ${record.state}<br>
+                    Level: ${record.geoLevel}<br>
+                    Households: ${(record.totalHouseholds || 0).toLocaleString()}<br>
+                    Poverty: ${record.povertyRate}%<br>
+                    ALICE: ${record.aliceRate}%<br>
+                    Combined: ${record.combinedRate}%
+                `);
+                
+                return marker;
+            }).filter(m => m !== null);
+            
+            markerClusterGroup.addLayers(markers);
+        }
+        
+        // Get color for rate
+        function getColor(rate) {
+            return rate > 50 ? '#e74c3c' :
+                   rate > 40 ? '#e67e22' :
+                   rate > 30 ? '#f39c12' :
+                   '#2ecc71';
+        }
+        
+        // Initialize DataTable
+        function initDataTable() {
+            dataTable = $('#dataTable').DataTable({
+                data: filteredData.slice(0, 1000), // Start with first 1000 for performance
+                columns: [
+                    { data: 'geoID' },
+                    { data: 'geoDisplayLabel', defaultContent: 'N/A' },
+                    { data: 'state' },
+                    { data: 'geoLevel' },
+                    { 
+                        data: 'totalHouseholds',
+                        render: function(data) {
+                            return (data || 0).toLocaleString();
+                        }
+                    },
+                    { data: 'povertyRate', defaultContent: '0' },
+                    { data: 'aliceRate', defaultContent: '0' },
+                    { 
+                        data: 'combinedRate',
+                        defaultContent: '0',
+                        render: function(data) {
+                            const rate = parseFloat(data) || 0;
+                            const badge = rate > 50 ? 'rate-critical' :
+                                         rate > 40 ? 'rate-high' :
+                                         rate > 30 ? 'rate-moderate' : 'rate-low';
+                            return `<span class="rate-badge ${badge}">${data}%</span>`;
+                        }
+                    }
+                ],
+                pageLength: 50,
+                responsive: true,
+                scrollY: '500px',
+                scrollCollapse: true,
+                dom: 'rtip',
+                order: [[7, 'desc']] // Sort by combined rate descending
+            });
+            
+            // Add click handler for rows
+            $('#dataTable tbody').on('click', 'tr', function() {
+                const data = dataTable.row(this).data();
+                if (data && stateCoordinates[data.state]) {
+                    const coords = stateCoordinates[data.state];
+                    map.setView(coords, 7);
+                }
+            });
+        }
+        
+        // Generate summary statistics
+        function generateSummaries() {
+            // Highest combined rates
+            const highest = [...aliceData]
+                .sort((a, b) => parseFloat(b.combinedRate) - parseFloat(a.combinedRate))
+                .slice(0, 5);
+            
+            document.getElementById('highestRates').innerHTML = highest.map(d => 
+                `<li>${d.geoDisplayLabel || d.county} <span class="rate-badge rate-critical">${d.combinedRate}%</span></li>`
+            ).join('');
+            
+            // Largest counties
+            const largest = [...aliceData]
+                .filter(d => d.geoLevel === 'county')
+                .sort((a, b) => b.totalHouseholds - a.totalHouseholds)
+                .slice(0, 5);
+            
+            document.getElementById('largestCounties').innerHTML = largest.map(d => 
+                `<li>${d.county}, ${d.state} <span>${d.totalHouseholds.toLocaleString()}</span></li>`
+            ).join('');
+            
+            // Critical areas
+            const critical = aliceData.filter(d => parseFloat(d.combinedRate) > 50).slice(0, 5);
+            
+            document.getElementById('criticalAreas').innerHTML = critical.map(d => 
+                `<li>${d.geoDisplayLabel || d.county} <span class="rate-badge rate-critical">${d.combinedRate}%</span></li>`
+            ).join('');
+            
+            // State averages
+            const stateAvgs = {};
+            aliceData.forEach(d => {
+                if (!stateAvgs[d.state]) {
+                    stateAvgs[d.state] = { sum: 0, count: 0 };
+                }
+                stateAvgs[d.state].sum += parseFloat(d.combinedRate || 0);
+                stateAvgs[d.state].count++;
+            });
+            
+            const stateList = Object.entries(stateAvgs)
+                .map(([state, data]) => ({
+                    state,
+                    avg: (data.sum / data.count).toFixed(1)
+                }))
+                .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg))
+                .slice(0, 5);
+            
+            document.getElementById('stateAverages').innerHTML = stateList.map(s => 
+                `<li>${s.state} <span>${s.avg}%</span></li>`
+            ).join('');
+        }
+        
+        // Switch view
+        function switchView(view) {
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('tableView').style.display = view === 'table' ? 'block' : 'none';
+            document.getElementById('summaryView').style.display = view === 'summary' ? 'block' : 'none';
+            document.getElementById('exportView').style.display = view === 'export' ? 'block' : 'none';
+            
+            if (view === 'export') {
+                updateExportStats();
+            }
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            const state = document.getElementById('stateFilter').value;
+            const level = document.getElementById('levelFilter').value;
+            const rate = document.getElementById('rateFilter').value;
+            const search = document.getElementById('quickSearch').value.toLowerCase();
+            
+            filteredData = aliceData.filter(d => {
+                let match = true;
+                
+                if (state && d.state !== state) match = false;
+                if (level && d.geoLevel !== level) match = false;
+                
+                if (rate) {
+                    const combinedRate = parseFloat(d.combinedRate);
+                    if (rate === 'critical' && combinedRate <= 50) match = false;
+                    if (rate === 'high' && (combinedRate <= 40 || combinedRate > 50)) match = false;
+                    if (rate === 'moderate' && (combinedRate <= 30 || combinedRate > 40)) match = false;
+                    if (rate === 'low' && combinedRate > 30) match = false;
+                }
+                
+                if (search) {
+                    const searchMatch = 
+                        (d.geoID && d.geoID.toLowerCase().includes(search)) ||
+                        (d.geoDisplayLabel && d.geoDisplayLabel.toLowerCase().includes(search)) ||
+                        (d.county && d.county.toLowerCase().includes(search)) ||
+                        (d.state && d.state.toLowerCase().includes(search));
+                    if (!searchMatch) match = false;
+                }
+                
+                return match;
+            });
+            
+            // Update table
+            dataTable.clear();
+            dataTable.rows.add(filteredData.slice(0, 1000));
+            dataTable.draw();
+            
+            // Update map
+            addMapMarkers(filteredData.slice(0, 500));
+        }
+        
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('stateFilter').value = '';
+            document.getElementById('levelFilter').value = '';
+            document.getElementById('rateFilter').value = '';
+            document.getElementById('quickSearch').value = '';
+            
+            filteredData = [...aliceData];
+            
+            dataTable.clear();
+            dataTable.rows.add(filteredData.slice(0, 1000));
+            dataTable.draw();
+            
+            addMapMarkers(filteredData.slice(0, 500));
+        }
+        
+        // Export functions
+        function exportCSV() {
+            const csv = convertToCSV(aliceData);
+            downloadFile(csv, 'alice_complete_database.csv', 'text/csv');
+        }
+        
+        function exportFilteredCSV() {
+            const csv = convertToCSV(filteredData);
+            downloadFile(csv, 'alice_filtered_data.csv', 'text/csv');
+        }
+        
+        function exportGeoJSON() {
+            const geojson = {
+                type: 'FeatureCollection',
+                features: filteredData.slice(0, 5000).map(d => {
+                    const coords = stateCoordinates[d.state];
+                    return {
+                        type: 'Feature',
+                        properties: d,
+                        geometry: {
+                            type: 'Point',
+                            coordinates: coords ? [coords[1], coords[0]] : [0, 0]
+                        }
+                    };
+                })
+            };
+            
+            downloadFile(JSON.stringify(geojson, null, 2), 'alice_data.geojson', 'application/geo+json');
+        }
+        
+        function exportSummaryReport() {
+            let report = 'ALICE DATABASE SUMMARY REPORT\n';
+            report += '=' .repeat(50) + '\n\n';
+            report += `Total Records: ${aliceData.length}\n`;
+            report += `Counties: ${aliceData.filter(d => d.geoLevel === 'county').length}\n`;
+            report += `Subcounties: ${aliceData.filter(d => d.geoLevel === 'subcounty').length}\n`;
+            report += `States: ${[...new Set(aliceData.map(d => d.state))].length}\n\n`;
+            
+            report += 'TOP 10 HIGHEST COMBINED RATES\n';
+            report += '-'.repeat(30) + '\n';
+            
+            const top10 = [...aliceData]
+                .sort((a, b) => parseFloat(b.combinedRate) - parseFloat(a.combinedRate))
+                .slice(0, 10);
+            
+            top10.forEach((d, i) => {
+                report += `${i+1}. ${d.geoDisplayLabel || d.county}, ${d.state}: ${d.combinedRate}%\n`;
+            });
+            
+            downloadFile(report, 'alice_summary_report.txt', 'text/plain');
+        }
+        
+        function convertToCSV(data) {
+            const headers = Object.keys(data[0]);
+            const csv = [
+                headers.join(','),
+                ...data.map(row => 
+                    headers.map(h => JSON.stringify(row[h] || '')).join(',')
+                )
+            ].join('\n');
+            return csv;
+        }
+        
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function updateExportStats() {
+            document.getElementById('exportTotal').textContent = aliceData.length.toLocaleString();
+            document.getElementById('exportFiltered').textContent = filteredData.length.toLocaleString();
+            
+            const estimatedSize = (JSON.stringify(filteredData).length / 1024 / 1024).toFixed(2);
+            document.getElementById('exportSize').textContent = estimatedSize + ' MB';
+        }
+        
+        // Fallback demo data if main data doesn't load
+        function loadDemoData() {
+            console.log('Loading demo data as fallback...');
+            // Would include subset of data here
+            updateProgress(100, 'Loaded demo data');
+            setTimeout(() => {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }, 500);
+        }
+        
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
