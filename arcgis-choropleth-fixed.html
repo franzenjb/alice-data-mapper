@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Data Choropleth Map - ArcGIS</title>
+    
+    <!-- ArcGIS CSS -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
+    
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        #viewDiv {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .control-panel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            width: 350px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.4em;
+        }
+        
+        .info-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #0079c1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #005a87;
+        }
+        
+        .layer-toggle {
+            margin: 15px 0;
+        }
+        
+        .toggle-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toggle-item input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #999;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .current-location {
+            padding: 15px;
+            background: #e8f4f8;
+            border-left: 4px solid #0079c1;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .location-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .rate-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .rate-box {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .rate-number {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .rate-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .poverty { color: #d73027; }
+        .alice { color: #fc8d59; }
+        .combined { color: #4575b4; }
+        .above { color: #91bfdb; }
+    </style>
+</head>
+<body>
+    <div id="viewDiv"></div>
+    
+    <div class="control-panel">
+        <h2>ALICE Choropleth Map</h2>
+        
+        <div class="info-box">
+            <div class="stat-row">
+                <span class="stat-label">Total Records:</span>
+                <span class="stat-value" id="totalRecords">79,964</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Data Status:</span>
+                <span class="stat-value" id="dataStatus">Loading...</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Map Type:</span>
+                <span class="stat-value">Choropleth</span>
+            </div>
+        </div>
+        
+        <label><strong>Select State to View:</strong></label>
+        <select id="stateFilter" onchange="filterByState()">
+            <option value="">United States (All)</option>
+            <option value="FL">Florida</option>
+            <option value="TX">Texas</option>
+            <option value="CA">California</option>
+            <option value="NY">New York</option>
+            <option value="PA">Pennsylvania</option>
+            <option value="IL">Illinois</option>
+            <option value="OH">Ohio</option>
+            <option value="GA">Georgia</option>
+            <option value="NC">North Carolina</option>
+            <option value="MI">Michigan</option>
+            <option value="NJ">New Jersey</option>
+            <option value="VA">Virginia</option>
+            <option value="WA">Washington</option>
+            <option value="MA">Massachusetts</option>
+            <option value="AZ">Arizona</option>
+            <option value="TN">Tennessee</option>
+            <option value="IN">Indiana</option>
+            <option value="MD">Maryland</option>
+            <option value="WI">Wisconsin</option>
+            <option value="CO">Colorado</option>
+            <option value="MN">Minnesota</option>
+            <option value="SC">South Carolina</option>
+            <option value="AL">Alabama</option>
+            <option value="LA">Louisiana</option>
+            <option value="OR">Oregon</option>
+            <option value="CT">Connecticut</option>
+            <option value="IA">Iowa</option>
+            <option value="MS">Mississippi</option>
+            <option value="AR">Arkansas</option>
+            <option value="KS">Kansas</option>
+            <option value="WV">West Virginia</option>
+            <option value="DE">Delaware</option>
+            <option value="HI">Hawaii</option>
+            <option value="ID">Idaho</option>
+            <option value="ME">Maine</option>
+            <option value="NM">New Mexico</option>
+        </select>
+        
+        <label><strong>Search County:</strong></label>
+        <input type="text" id="countySearch" placeholder="Type county name..." onkeyup="searchCounty()">
+        
+        <div class="current-location" id="currentLocation" style="display: none;">
+            <div class="location-name" id="locationName">-</div>
+            <div class="rate-display">
+                <div class="rate-box">
+                    <div class="rate-number poverty" id="povertyRate">-</div>
+                    <div class="rate-label">Poverty</div>
+                </div>
+                <div class="rate-box">
+                    <div class="rate-number alice" id="aliceRate">-</div>
+                    <div class="rate-label">ALICE</div>
+                </div>
+                <div class="rate-box">
+                    <div class="rate-number combined" id="combinedRate">-</div>
+                    <div class="rate-label">Combined</div>
+                </div>
+                <div class="rate-box">
+                    <div class="rate-number above" id="householdCount">-</div>
+                    <div class="rate-label">Households</div>
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="toggleBasemap()">Toggle Basemap</button>
+        
+        <div class="legend">
+            <strong>Combined ALICE + Poverty Rate</strong>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2166ac;"></div>
+                <span>&lt; 30% - Low</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #67a9cf;"></div>
+                <span>30-35%</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #d1e5f0;"></div>
+                <span>35-40%</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fddbc7;"></div>
+                <span>40-45%</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f4a582;"></div>
+                <span>45-50%</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #d6604d;"></div>
+                <span>&gt; 50% - Critical</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loading" id="loadingDiv">
+        <h3>Loading ALICE Choropleth Map...</h3>
+        <p>Fetching county boundaries and joining data...</p>
+    </div>
+    
+    <!-- ArcGIS JavaScript API -->
+    <script src="https://js.arcgis.com/4.28/"></script>
+    
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/layers/GraphicsLayer",
+            "esri/Graphic",
+            "esri/geometry/Polygon",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/renderers/UniqueValueRenderer",
+            "esri/widgets/Search",
+            "esri/rest/support/Query"
+        ], async function(
+            Map, MapView, FeatureLayer, GraphicsLayer, Graphic, Polygon, 
+            SimpleFillSymbol, UniqueValueRenderer, Search, Query
+        ) {
+            
+            let view;
+            let countyLayer;
+            let aliceDataLayer;
+            let aliceData = {};
+            let currentBasemap = 'gray-vector';
+            
+            // Initialize map
+            const map = new Map({
+                basemap: currentBasemap
+            });
+            
+            view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-98.5795, 39.8283],
+                zoom: 5,
+                popup: {
+                    dockEnabled: true,
+                    dockOptions: {
+                        position: "bottom-left",
+                        breakpoint: false
+                    }
+                }
+            });
+            
+            // Load ALICE data
+            await loadALICEData();
+            
+            // Setup map layers
+            await setupMap();
+            
+            async function loadALICEData() {
+                try {
+                    const response = await fetch('alice_master_database.json');
+                    const data = await response.json();
+                    
+                    // Index by FIPS code with multiple formats
+                    data.forEach(record => {
+                        const geoID = record.geoID;
+                        
+                        // Store with different padding formats
+                        aliceData[geoID] = record;
+                        
+                        // Pad to 5 digits for counties
+                        if (geoID && geoID.length < 5) {
+                            const padded = geoID.padStart(5, '0');
+                            aliceData[padded] = record;
+                        }
+                        
+                        // Also store without leading zeros
+                        if (geoID && geoID.startsWith('0')) {
+                            aliceData[parseInt(geoID).toString()] = record;
+                        }
+                    });
+                    
+                    console.log('Loaded ALICE data:', Object.keys(aliceData).length, 'records indexed');
+                    document.getElementById('dataStatus').textContent = 'Data Loaded';
+                    document.getElementById('totalRecords').textContent = data.length.toLocaleString();
+                    
+                } catch (error) {
+                    console.error('Error loading ALICE data:', error);
+                    document.getElementById('dataStatus').textContent = 'Using Sample Data';
+                    loadSampleFloridaData();
+                }
+            }
+            
+            async function setupMap() {
+                // Create a graphics layer for the choropleth
+                aliceDataLayer = new GraphicsLayer({
+                    title: "ALICE Data by County"
+                });
+                
+                // Load county boundaries from ArcGIS
+                const countyUrl = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_Counties_Generalized_Boundaries/FeatureServer/0";
+                
+                countyLayer = new FeatureLayer({
+                    url: countyUrl,
+                    outFields: ["*"],
+                    opacity: 0.8,
+                    renderer: createRenderer(),
+                    popupTemplate: createPopupTemplate()
+                });
+                
+                // When counties load, join with ALICE data
+                countyLayer.when(() => {
+                    console.log('County layer loaded');
+                    joinAliceDataToCounties();
+                });
+                
+                map.add(countyLayer);
+                
+                // Add search widget
+                const search = new Search({
+                    view: view,
+                    sources: [{
+                        layer: countyLayer,
+                        searchFields: ["NAME", "STATE_NAME"],
+                        displayField: "NAME",
+                        exactMatch: false,
+                        placeholder: "Search counties...",
+                        maxResults: 6,
+                        maxSuggestions: 6,
+                        suggestionsEnabled: true,
+                        minSuggestCharacters: 2
+                    }]
+                });
+                
+                view.ui.add(search, "top-left");
+                
+                // Click handler for popups
+                view.on("click", (event) => {
+                    view.hitTest(event).then((response) => {
+                        if (response.results.length > 0) {
+                            const graphic = response.results[0].graphic;
+                            if (graphic && graphic.attributes) {
+                                displayLocationData(graphic.attributes);
+                            }
+                        }
+                    });
+                });
+                
+                // Hide loading
+                setTimeout(() => {
+                    document.getElementById('loadingDiv').style.display = 'none';
+                }, 1000);
+            }
+            
+            function createRenderer() {
+                // Create a simple renderer with visual variables
+                return {
+                    type: "simple",
+                    symbol: {
+                        type: "simple-fill",
+                        outline: {
+                            color: [255, 255, 255, 0.5],
+                            width: 0.5
+                        }
+                    },
+                    visualVariables: [{
+                        type: "color",
+                        field: "POPULATION", // Use population as fallback
+                        stops: [
+                            { value: 0, color: "#2166ac" },
+                            { value: 50000, color: "#67a9cf" },
+                            { value: 100000, color: "#d1e5f0" },
+                            { value: 200000, color: "#fddbc7" },
+                            { value: 500000, color: "#f4a582" },
+                            { value: 1000000, color: "#d6604d" }
+                        ]
+                    }]
+                };
+            }
+            
+            function joinAliceDataToCounties() {
+                // Query all counties
+                const query = countyLayer.createQuery();
+                query.where = "1=1";
+                query.outFields = ["*"];
+                query.returnGeometry = true;
+                
+                countyLayer.queryFeatures(query).then((results) => {
+                    console.log('Processing', results.features.length, 'counties');
+                    
+                    const graphics = [];
+                    
+                    results.features.forEach(feature => {
+                        const attrs = feature.attributes;
+                        
+                        // Try different FIPS formats
+                        const fips = attrs.FIPS || 
+                                    attrs.GEOID || 
+                                    attrs.COUNTY_FIPS ||
+                                    (attrs.STATE_FIPS + attrs.CNTY_FIPS);
+                        
+                        const aliceRecord = findAliceData(fips);
+                        
+                        if (aliceRecord && feature.geometry) {
+                            const combinedRate = parseFloat(aliceRecord.combinedRate) || 0;
+                            const color = getColorForRate(combinedRate);
+                            
+                            const graphic = new Graphic({
+                                geometry: feature.geometry,
+                                symbol: new SimpleFillSymbol({
+                                    color: color,
+                                    outline: {
+                                        color: [255, 255, 255, 0.5],
+                                        width: 0.5
+                                    }
+                                }),
+                                attributes: {
+                                    ...attrs,
+                                    ...aliceRecord,
+                                    OBJECTID: attrs.OBJECTID || attrs.FID
+                                }
+                            });
+                            
+                            graphics.push(graphic);
+                        }
+                    });
+                    
+                    console.log('Created', graphics.length, 'choropleth graphics');
+                    
+                    if (graphics.length > 0) {
+                        aliceDataLayer.addMany(graphics);
+                        map.add(aliceDataLayer);
+                        
+                        // Update renderer on the original layer
+                        countyLayer.opacity = 0; // Hide original layer
+                    }
+                });
+            }
+            
+            function findAliceData(fips) {
+                if (!fips) return null;
+                
+                // Try exact match
+                let data = aliceData[fips];
+                
+                // Try with padding
+                if (!data && fips.length < 5) {
+                    data = aliceData[fips.padStart(5, '0')];
+                }
+                
+                // Try without leading zeros
+                if (!data) {
+                    data = aliceData[parseInt(fips).toString()];
+                }
+                
+                // Try as substring (for longer FIPS codes)
+                if (!data && fips.length > 5) {
+                    data = aliceData[fips.substring(0, 5)];
+                }
+                
+                return data;
+            }
+            
+            function getColorForRate(rate) {
+                // Color scale for combined rate
+                if (rate > 50) return [214, 96, 77, 200];      // Dark red
+                if (rate > 45) return [244, 165, 130, 200];    // Orange-red
+                if (rate > 40) return [253, 219, 199, 200];    // Light orange
+                if (rate > 35) return [209, 229, 240, 200];    // Light blue
+                if (rate > 30) return [103, 169, 207, 200];    // Medium blue
+                return [33, 102, 172, 200];                     // Dark blue
+            }
+            
+            function createPopupTemplate() {
+                return {
+                    title: "{NAME}, {STATE_NAME}",
+                    content: (feature) => {
+                        const attrs = feature.graphic.attributes;
+                        const fips = attrs.FIPS || attrs.GEOID;
+                        const aliceRecord = findAliceData(fips);
+                        
+                        if (aliceRecord) {
+                            return `
+                                <div style="padding: 10px;">
+                                    <table style="width: 100%;">
+                                        <tr style="background: #f5f5f5;">
+                                            <td colspan="2"><strong>ALICE Data (${aliceRecord.year || '2023'})</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Poverty Rate:</td>
+                                            <td style="text-align: right; font-weight: bold; color: #d73027;">${aliceRecord.povertyRate}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>ALICE Rate:</td>
+                                            <td style="text-align: right; font-weight: bold; color: #fc8d59;">${aliceRecord.aliceRate}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Combined Rate:</td>
+                                            <td style="text-align: right; font-weight: bold; color: #4575b4;">${aliceRecord.combinedRate}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Households:</td>
+                                            <td style="text-align: right;">${(aliceRecord.totalHouseholds || 0).toLocaleString()}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Poverty Households:</td>
+                                            <td style="text-align: right;">${(aliceRecord.povertyHouseholds || 0).toLocaleString()}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>ALICE Households:</td>
+                                            <td style="text-align: right;">${(aliceRecord.aliceHouseholds || 0).toLocaleString()}</td>
+                                        </tr>
+                                    </table>
+                                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                                        <small>GeoID: ${aliceRecord.geoID} | FIPS: ${fips}</small>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div style="padding: 10px;">
+                                    <p>No ALICE data available for this county.</p>
+                                    <small>FIPS: ${fips}</small>
+                                </div>
+                            `;
+                        }
+                    }
+                };
+            }
+            
+            function displayLocationData(attributes) {
+                const fips = attributes.FIPS || attributes.GEOID;
+                const aliceRecord = findAliceData(fips);
+                
+                if (aliceRecord) {
+                    document.getElementById('currentLocation').style.display = 'block';
+                    document.getElementById('locationName').textContent = 
+                        `${attributes.NAME || attributes.COUNTYNAME || 'Unknown'}, ${attributes.STATE_NAME || ''}`;
+                    
+                    document.getElementById('povertyRate').textContent = aliceRecord.povertyRate + '%';
+                    document.getElementById('aliceRate').textContent = aliceRecord.aliceRate + '%';
+                    document.getElementById('combinedRate').textContent = aliceRecord.combinedRate + '%';
+                    document.getElementById('householdCount').textContent = 
+                        (aliceRecord.totalHouseholds || 0).toLocaleString();
+                }
+            }
+            
+            window.filterByState = function() {
+                const stateAbbr = document.getElementById('stateFilter').value;
+                
+                if (stateAbbr) {
+                    // State extents
+                    const stateViews = {
+                        'FL': { center: [-81.5, 27.8], zoom: 7 },
+                        'TX': { center: [-99.0, 31.0], zoom: 6 },
+                        'CA': { center: [-119.5, 37.0], zoom: 6 },
+                        'NY': { center: [-75.5, 43.0], zoom: 7 },
+                        'PA': { center: [-77.8, 40.9], zoom: 7 },
+                        'IL': { center: [-89.4, 40.0], zoom: 7 },
+                        'OH': { center: [-82.7, 40.2], zoom: 7 },
+                        'GA': { center: [-83.5, 32.7], zoom: 7 },
+                        'NC': { center: [-79.8, 35.5], zoom: 7 },
+                        'MI': { center: [-85.5, 44.3], zoom: 7 }
+                    };
+                    
+                    const viewConfig = stateViews[stateAbbr] || { center: [-98.5795, 39.8283], zoom: 5 };
+                    view.goTo(viewConfig);
+                    
+                    // Filter display
+                    if (countyLayer) {
+                        const stateName = getStateName(stateAbbr);
+                        countyLayer.definitionExpression = `STATE_NAME = '${stateName}'`;
+                    }
+                    if (aliceDataLayer) {
+                        aliceDataLayer.visible = stateAbbr === '';
+                    }
+                } else {
+                    resetView();
+                }
+            };
+            
+            window.resetView = function() {
+                view.goTo({
+                    center: [-98.5795, 39.8283],
+                    zoom: 5
+                });
+                
+                if (countyLayer) {
+                    countyLayer.definitionExpression = null;
+                }
+                if (aliceDataLayer) {
+                    aliceDataLayer.visible = true;
+                }
+                
+                document.getElementById('stateFilter').value = '';
+                document.getElementById('countySearch').value = '';
+                document.getElementById('currentLocation').style.display = 'none';
+            };
+            
+            window.toggleBasemap = function() {
+                currentBasemap = currentBasemap === 'gray-vector' ? 'satellite' : 'gray-vector';
+                map.basemap = currentBasemap;
+            };
+            
+            window.searchCounty = function() {
+                const searchText = document.getElementById('countySearch').value.toLowerCase();
+                
+                if (searchText.length < 2) return;
+                
+                // Query counties matching search
+                const query = countyLayer.createQuery();
+                query.where = `LOWER(NAME) LIKE '%${searchText}%'`;
+                query.returnGeometry = true;
+                query.outFields = ["*"];
+                
+                countyLayer.queryFeatures(query).then((results) => {
+                    if (results.features.length > 0) {
+                        const feature = results.features[0];
+                        view.goTo({
+                            target: feature.geometry,
+                            zoom: 9
+                        });
+                        
+                        displayLocationData(feature.attributes);
+                    }
+                });
+            };
+            
+            function getStateName(abbr) {
+                const states = {
+                    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas',
+                    'CA': 'California', 'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware',
+                    'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'ID': 'Idaho',
+                    'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa', 'KS': 'Kansas',
+                    'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+                    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi',
+                    'MO': 'Missouri', 'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada',
+                    'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NY': 'New York',
+                    'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio', 'OK': 'Oklahoma',
+                    'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+                    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah',
+                    'VT': 'Vermont', 'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia',
+                    'WI': 'Wisconsin', 'WY': 'Wyoming'
+                };
+                return states[abbr] || abbr;
+            }
+            
+            function loadSampleFloridaData() {
+                // Sample data for Florida counties
+                aliceData = {
+                    '12057': { // Hillsborough (Tampa)
+                        geoID: '12057',
+                        state: 'Florida',
+                        county: 'Hillsborough',
+                        povertyRate: '13.8',
+                        aliceRate: '34.9',
+                        combinedRate: '48.7',
+                        totalHouseholds: 550000,
+                        povertyHouseholds: 75900,
+                        aliceHouseholds: 191950,
+                        year: 2023
+                    },
+                    '12103': { // Pinellas (St. Petersburg)
+                        geoID: '12103',
+                        state: 'Florida',
+                        county: 'Pinellas',
+                        povertyRate: '11.9',
+                        aliceRate: '33.6',
+                        combinedRate: '45.5',
+                        totalHouseholds: 425000,
+                        povertyHouseholds: 50575,
+                        aliceHouseholds: 142800,
+                        year: 2023
+                    },
+                    '12086': { // Miami-Dade
+                        geoID: '12086',
+                        state: 'Florida',
+                        county: 'Miami-Dade',
+                        povertyRate: '16.3',
+                        aliceRate: '37.4',
+                        combinedRate: '53.7',
+                        totalHouseholds: 950000,
+                        povertyHouseholds: 154850,
+                        aliceHouseholds: 355300,
+                        year: 2023
+                    },
+                    '12011': { // Broward
+                        geoID: '12011',
+                        state: 'Florida',
+                        county: 'Broward',
+                        povertyRate: '13.2',
+                        aliceRate: '35.8',
+                        combinedRate: '49.0',
+                        totalHouseholds: 750000,
+                        povertyHouseholds: 99000,
+                        aliceHouseholds: 268500,
+                        year: 2023
+                    },
+                    '12099': { // Palm Beach
+                        geoID: '12099',
+                        state: 'Florida',
+                        county: 'Palm Beach',
+                        povertyRate: '12.1',
+                        aliceRate: '34.2',
+                        combinedRate: '46.3',
+                        totalHouseholds: 580000,
+                        povertyHouseholds: 70180,
+                        aliceHouseholds: 198360,
+                        year: 2023
+                    }
+                };
+                
+                console.log('Loaded sample Florida data');
+            }
+        });
+    </script>
+</body>
+</html>
