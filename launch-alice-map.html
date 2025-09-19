@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launch ALICE Map - Red Cross</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ED1B2E 0%, #8B0000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .launcher {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .redcross-logo {
+            width: 80px;
+            height: 80px;
+            background: #ED1B2E;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+        
+        .steps {
+            text-align: left;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .steps h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+            color: #555;
+        }
+        
+        .steps li {
+            margin: 8px 0;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-direction: column;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #ED1B2E;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #C41E3A;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(237, 27, 46, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #0079c1;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #005a87;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 121, 193, 0.3);
+        }
+        
+        .note {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            color: #f57c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="launcher">
+        <div class="redcross-logo">+</div>
+        <h1>ALICE Data Explorer</h1>
+        <p>American Red Cross Geographic Data Analysis Tool</p>
+        
+        <div class="steps">
+            <h3>Quick Start Guide:</h3>
+            <ol>
+                <li>Click "Sign In to Red Cross Portal" below</li>
+                <li>Select "American Red Cross, National Headquarters"</li>
+                <li>Enter your Red Cross credentials</li>
+                <li>Complete 2FA if prompted</li>
+                <li>Return here and click "Open ALICE Map"</li>
+            </ol>
+        </div>
+        
+        <div class="buttons">
+            <a href="https://arc-nhq-gis.maps.arcgis.com/home/signin.html" 
+               target="_blank" 
+               class="btn btn-primary"
+               onclick="enableMapButton()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 2v8H2v4h8v8h4v-8h8v-4h-8V2h-4z"/>
+                </svg>
+                Step 1: Sign In to Red Cross Portal
+            </a>
+            
+            <a href="arcgis-choropleth-trends.html" 
+               target="_self"
+               class="btn btn-secondary"
+               id="mapButton">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                Step 2: Open ALICE Map
+            </a>
+        </div>
+        
+        <div class="note">
+            <strong>Note:</strong> You must complete Step 1 (login) before the map will work properly. 
+            Your session will be saved for future use.
+        </div>
+    </div>
+    
+    <script>
+        // Check if user is coming back from login
+        if (document.referrer.includes('arc-nhq-gis.maps.arcgis.com')) {
+            document.getElementById('mapButton').style.background = '#2e7d32';
+            document.getElementById('mapButton').innerHTML = `
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                </svg>
+                Ready: Open ALICE Map
+            `;
+        }
+        
+        function enableMapButton() {
+            setTimeout(() => {
+                const mapBtn = document.getElementById('mapButton');
+                mapBtn.style.opacity = '1';
+                mapBtn.style.pointerEvents = 'auto';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Quick Login</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .setup-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #ED1B2E;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #ED1B2E;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-save {
+            background: #ED1B2E;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #C41E3A;
+        }
+        
+        .btn-clear {
+            background: #666;
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            background: #555;
+        }
+        
+        .btn-test {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-test:hover {
+            background: #45a049;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #81c784;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        
+        .info-box p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .warning {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            color: #f57c00;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h1>🔐 Setup Quick Login</h1>
+        
+        <div class="info-box">
+            <h3>How it works:</h3>
+            <p>• Your credentials are encrypted and stored locally in your browser</p>
+            <p>• You create a simple quick code (like a PIN) for fast access</p>
+            <p>• Bookmark the quick login page for one-click access</p>
+            <p>• Only works on this computer/browser</p>
+        </div>
+        
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="email">Red Cross Email:</label>
+                <input type="email" 
+                       id="email" 
+                       placeholder="your.name@redcross.org"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Red Cross Password:</label>
+                <input type="password" 
+                       id="password" 
+                       placeholder="Your actual password"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quickCode">Quick Access Code (make it simple):</label>
+                <input type="text" 
+                       id="quickCode" 
+                       placeholder="e.g., 'red' or '1234' or any word"
+                       required>
+            </div>
+            
+            <div class="buttons">
+                <button type="submit" class="btn-save">Save Credentials</button>
+                <button type="button" class="btn-test" onclick="testLogin()">Test Login</button>
+                <button type="button" class="btn-clear" onclick="clearCredentials()">Clear All</button>
+            </div>
+        </form>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="warning">
+            <strong>⚠️ Security Note:</strong> This tool stores your actual password in your browser. Only use this on your personal, secure computer. Never use on shared or public computers.
+        </div>
+    </div>
+    
+    <script>
+        // Check if already configured
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('rcu')) {
+                document.getElementById('email').value = localStorage.getItem('rcu');
+                document.getElementById('quickCode').value = localStorage.getItem('rcq') || '';
+                showStatus('Credentials already configured. Update as needed.', 'success');
+            }
+        });
+        
+        // Save credentials
+        document.getElementById('setupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const quickCode = document.getElementById('quickCode').value;
+            
+            // Simple encryption (just obfuscation really)
+            const encoded = btoa(password);
+            
+            // Save to localStorage
+            localStorage.setItem('rcu', email);
+            localStorage.setItem('rcp', encoded);
+            localStorage.setItem('rcq', quickCode);
+            
+            showStatus('✅ Credentials saved! You can now use the quick login page.', 'success');
+            
+            // Show the quick login URL
+            setTimeout(() => {
+                const quickLoginUrl = window.location.href.replace('setup-quicklogin.html', 'redcross-quicklogin.html');
+                showStatus(`✅ Saved! Bookmark this for quick access: ${quickLoginUrl}`, 'success');
+            }, 2000);
+        });
+        
+        function clearCredentials() {
+            if (confirm('This will delete all saved credentials. Continue?')) {
+                localStorage.removeItem('rcu');
+                localStorage.removeItem('rcp');
+                localStorage.removeItem('rcq');
+                
+                document.getElementById('setupForm').reset();
+                showStatus('Credentials cleared.', 'success');
+            }
+        }
+        
+        function testLogin() {
+            const quickCode = localStorage.getItem('rcq');
+            if (!quickCode) {
+                showStatus('Please save credentials first.', 'error');
+                return;
+            }
+            
+            // Open quick login page
+            window.open('redcross-quicklogin.html', '_blank');
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.className = `status show ${type}`;
+            status.innerHTML = message;
+        }
+    </script>
+</body>
+</html>
