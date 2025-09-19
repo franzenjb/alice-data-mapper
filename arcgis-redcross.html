@@ -513,35 +513,21 @@
             esriId = IdentityManager;
             Portal = PortalClass;
             
-            // Setup OAuth for Red Cross organization
+            // Setup OAuth for ArcGIS Online with Red Cross organization
             const info = new OAuthInfo({
-                appId: "rcApps", // Red Cross app ID
-                portalUrl: "https://gis.redcross.org/portal", // Red Cross portal
-                flowType: "auto", // Will handle org SSO
-                popup: true,
-                popupCallbackUrl: window.location.href.replace(/[^/]*$/, 'oauth-callback.html')
-            });
-            
-            // Also register for standard ArcGIS Online
-            const publicInfo = new OAuthInfo({
                 appId: "YjvdaQPiEsXpnJMH",
                 portalUrl: "https://www.arcgis.com",
                 popup: true,
                 popupCallbackUrl: window.location.href.replace(/[^/]*$/, 'oauth-callback.html')
             });
             
-            esriId.registerOAuthInfos([info, publicInfo]);
+            esriId.registerOAuthInfos([info]);
             
             // Check if already logged in
-            esriId.checkSignInStatus(info.portalUrl + "/sharing").then(function() {
+            esriId.checkSignInStatus("https://www.arcgis.com/sharing").then(function() {
                 loadPortal();
             }).catch(function() {
-                // Also check public ArcGIS
-                esriId.checkSignInStatus("https://www.arcgis.com/sharing").then(function() {
-                    loadPortal();
-                }).catch(function() {
-                    console.log("User not authenticated");
-                });
+                console.log("User not authenticated");
             });
         });
         
@@ -549,51 +535,32 @@
         function handleRedCrossLogin() {
             const authStatus = document.getElementById('authStatus');
             authStatus.className = 'auth-status info';
-            authStatus.textContent = 'Redirecting to Red Cross authentication...';
+            authStatus.textContent = 'Redirecting to ArcGIS authentication...';
             
-            // Try Red Cross portal first
-            esriId.getCredential("https://gis.redcross.org/portal/sharing", {
+            // This will redirect to ArcGIS and then to Red Cross org login
+            esriId.getCredential("https://www.arcgis.com/sharing", {
                 oAuthPopupConfirmation: false
             }).then(function(credential) {
                 authStatus.className = 'auth-status success';
-                authStatus.textContent = 'Red Cross authentication successful!';
+                authStatus.textContent = 'Authentication successful!';
                 loadPortal();
             }).catch(function(error) {
-                // If Red Cross portal fails, try public ArcGIS with org redirect
-                console.log("Red Cross portal not available, trying ArcGIS Online...");
-                
-                authStatus.textContent = 'Connecting to ArcGIS Online...';
-                
-                // This will redirect to org login automatically
-                esriId.getCredential("https://www.arcgis.com/sharing", {
-                    oAuthPopupConfirmation: false
-                }).then(function(credential) {
-                    authStatus.className = 'auth-status success';
-                    authStatus.textContent = 'Authentication successful!';
-                    loadPortal();
-                }).catch(function(error) {
-                    authStatus.className = 'auth-status error';
-                    authStatus.textContent = 'Authentication failed. Please try again.';
-                    console.error("Login failed:", error);
-                });
+                authStatus.className = 'auth-status error';
+                authStatus.textContent = 'Authentication failed. Please try again.';
+                console.error("Login failed:", error);
             });
         }
         
         // Load portal and user info
         function loadPortal() {
-            // Try Red Cross portal first
-            portal = new Portal("https://gis.redcross.org/portal");
+            // Use standard ArcGIS portal
+            portal = new Portal("https://www.arcgis.com");
             portal.authMode = "immediate";
             
             portal.load().then(function() {
                 onPortalLoaded();
-            }).catch(function() {
-                // Fall back to public ArcGIS
-                portal = new Portal("https://www.arcgis.com");
-                portal.authMode = "immediate";
-                portal.load().then(function() {
-                    onPortalLoaded();
-                });
+            }).catch(function(error) {
+                console.error("Failed to load portal:", error);
             });
         }
         
