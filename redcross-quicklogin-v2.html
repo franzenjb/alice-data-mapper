@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RC Quick Login v2</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ED1B2E;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .quick-login {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 300px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            color: #ED1B2E;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #333;
+            margin: 0 0 20px 0;
+            font-size: 1.2em;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #ED1B2E;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ED1B2E;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #C41E3A;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .direct-link {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .direct-link a {
+            color: #ED1B2E;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .direct-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            text-align: left;
+        }
+        
+        .instructions h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="quick-login">
+        <div class="logo">+</div>
+        <h2>Red Cross Quick Login</h2>
+        
+        <form id="quickLoginForm">
+            <input type="password" 
+                   id="quickpass" 
+                   placeholder="Enter quick code" 
+                   autocomplete="off"
+                   autofocus>
+            <button type="submit">Launch Portal</button>
+        </form>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="direct-link">
+            <p>Or use the direct SSO link:</p>
+            <a href="https://www.redcross.org/sso/defaultsso.html?arcPartnerId=defaultsso&resume=/idp/N0AXe2tXac/resumeSAML20/idp/SSO.ping&spentity=arc-nhq-gis.maps.arcgis.com" 
+               target="_blank">
+                Go directly to Red Cross SSO →
+            </a>
+        </div>
+        
+        <div class="instructions">
+            <h4>After clicking Launch Portal:</h4>
+            <ol>
+                <li>Portal opens in new window</li>
+                <li>Click the blue "American Red Cross" button</li>
+                <li>Your credentials will auto-fill</li>
+                <li>Complete 2FA if needed</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        // Check if credentials are stored
+        const hasCredentials = localStorage.getItem('rcu') && localStorage.getItem('rcp') && localStorage.getItem('rcq');
+        
+        if (!hasCredentials) {
+            document.getElementById('status').className = 'status show error';
+            document.getElementById('status').textContent = 'Please run setup first';
+        }
+        
+        document.getElementById('quickLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const quickCode = document.getElementById('quickpass').value;
+            const storedQuickCode = localStorage.getItem('rcq');
+            
+            if (!storedQuickCode) {
+                showStatus('Credentials not configured', 'error');
+                window.open('setup-quicklogin.html', '_blank');
+                return;
+            }
+            
+            if (quickCode !== storedQuickCode) {
+                showStatus('Invalid quick code', 'error');
+                return;
+            }
+            
+            showStatus('Opening portal...', 'loading');
+            
+            // Get stored credentials
+            const username = localStorage.getItem('rcu');
+            const password = atob(localStorage.getItem('rcp'));
+            
+            // Open the ArcGIS portal with a specific URL that might bypass the first screen
+            const portalWindow = window.open(
+                'https://arc-nhq-gis.maps.arcgis.com/home/signin.html?returnUrl=https://arc-nhq-gis.maps.arcgis.com/home/content.html',
+                '_blank'
+            );
+            
+            // Try to inject a script to auto-click the button
+            setTimeout(() => {
+                showStatus('Portal opened. Click "American Red Cross" button if needed.', 'success');
+                
+                // Store credentials for the page to potentially use
+                sessionStorage.setItem('autoFillUser', username);
+                sessionStorage.setItem('autoFillPass', password);
+            }, 2000);
+        });
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.className = `status show ${type}`;
+            status.textContent = message;
+        }
+        
+        // Auto-focus on load
+        window.addEventListener('load', () => {
+            document.getElementById('quickpass').focus();
+        });
+    </script>
+</body>
+</html>
