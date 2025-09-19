@@ -881,6 +881,9 @@
                         setTimeout(() => {
                             layer.openPopup();
                         }, 500);
+                        
+                        // Automatically show trends for this county
+                        showTrendsForCounty(exactMatch.geoID, exactMatch.county, exactMatch.state);
                     }
                 }
             }
