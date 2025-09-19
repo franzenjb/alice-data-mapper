@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>OAuth Callback</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .message {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        .message h2 {
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+        .message p {
+            color: #666;
+            margin: 0;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h2>Authentication Successful!</h2>
+        <p>Completing sign-in process...</p>
+        <div class="spinner"></div>
+    </div>
+    
+    <script>
+        // This page handles the OAuth callback
+        // The ArcGIS API will automatically close this window
+        // and return control to the main application
+        
+        // Optional: Add error handling
+        if (window.location.hash && window.location.hash.includes('error')) {
+            document.querySelector('h2').textContent = 'Authentication Failed';
+            document.querySelector('p').textContent = 'Please close this window and try again.';
+            document.querySelector('.spinner').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
