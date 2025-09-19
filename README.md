@@ -1,77 +1,69 @@
-# ALICE Data Interactive Mapper
+# ALICE Data Mapper
 
-A powerful interactive visualization tool for exploring ALICE (Asset Limited, Income Constrained, Employed) data across the United States.
+An interactive data visualization tool for exploring ALICE (Asset Limited, Income Constrained, Employed) demographic data across the United States. Built for the American Red Cross to support disaster response and community outreach efforts.
+
+## Live Demo
+
+🌐 **[View Live Application](https://franzenjb.github.io/alice-data-mapper/)**
 
 ## Features
 
-- **Interactive Map**: Visual representation of ALICE data across 32 states
-- **Dynamic Filtering**: Switch between viewing Poverty Rate, ALICE Rate, or Combined Rate
-- **State Rankings**: Sortable list of states by various metrics
-- **Detailed State Information**: Click any state for comprehensive statistics
-- **Data Visualizations**: 
-  - Bar chart showing top 10 states by financial hardship
-  - Scatter plot showing correlation between poverty and ALICE rates
-- **Responsive Design**: Works on desktop and mobile devices
-
-## Technology Stack
-
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Visualization Libraries**:
-  - Leaflet.js for interactive mapping
-  - Chart.js for data charts
-  - D3.js for advanced data manipulation
-- **Data Collection**: 
-  - Playwright for web scraping
-  - Axios for HTTP requests
+- 📊 **Interactive Choropleth Map**: Visualize ALICE data across 3,000+ U.S. counties
+- 🔍 **Smart Search**: Filter by state and county with automatic zoom
+- 📈 **Historical Trends**: Analyze data from 2010-2023
+- 💾 **Export Capability**: Download data as CSV for further analysis
+- 🎨 **Red Cross Branding**: Official American Red Cross theme and colors
+- 🔓 **No Authentication Required**: Public access using OpenStreetMap tiles
 
 ## Data Source
 
-Data is sourced from the United For ALICE website (https://www.unitedforalice.org), which provides comprehensive research on households that are Asset Limited, Income Constrained, and Employed.
+The application displays ALICE data from the United Way's ALICE project, which provides comprehensive poverty and financial hardship metrics at the county and sub-county level across all U.S. states.
 
-## Installation
+### Key Metrics
+- **ALICE Rate**: Percentage of households above poverty but below basic cost of living
+- **Poverty Rate**: Percentage of households below federal poverty line
+- **Combined Rate**: Total percentage of households struggling financially
+
+## Local Development
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/[your-username]/alice-data-mapper.git
+git clone https://github.com/franzenjb/alice-data-mapper.git
 cd alice-data-mapper
 ```
 
-2. Install dependencies:
+2. Serve the application locally:
 ```bash
-npm install
+npm run serve
+```
+Or with Python:
+```bash
+python3 -m http.server 8000
 ```
 
-3. Run the data scraper (optional - data is pre-included):
-```bash
-node enhanced-scraper.js
+3. Open in browser:
+```
+http://localhost:8000
 ```
 
-4. Open `index.html` in your browser or serve with a local server:
-```bash
-npx http-server -p 8080
-```
+## Technology Stack
 
-## Understanding ALICE
+- **Mapping**: Leaflet.js with OpenStreetMap tiles
+- **Data Visualization**: Chart.js for trend analysis
+- **Styling**: Custom CSS with Red Cross branding
+- **Data Format**: JSON database with 79,964 geographic records
 
-ALICE represents households that earn above the federal poverty level but struggle to afford basic household necessities. The combined ALICE and poverty rate shows the true percentage of households facing financial hardship in each state.
+## Browser Compatibility
 
-## Key Metrics
-
-- **Poverty Rate**: Percentage of households below the federal poverty line
-- **ALICE Rate**: Percentage of households above poverty but below the ALICE threshold
-- **Combined Rate**: Total percentage of households struggling financially
-
-## States Covered
-
-The tool includes data for 32 states with active ALICE research programs:
-Alabama, Arkansas, Colorado, Connecticut, Delaware, Florida, Georgia, Hawaii, Idaho, Illinois, Indiana, Iowa, Kansas, Louisiana, Maine, Maryland, Michigan, Minnesota, Mississippi, New Jersey, New Mexico, New York, North Carolina, Ohio, Oregon, Pennsylvania, South Carolina, Tennessee, Texas, Virginia, Washington, and West Virginia.
+Works on all modern browsers including:
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
 
 ## License
 
-MIT License
+MIT License - See LICENSE file for details
 
-## Acknowledgments
+## Support
 
-- United For ALICE for providing the research and data
-- OpenStreetMap contributors for map tiles
-- All open-source library maintainers
+For questions or issues, please open a GitHub issue in this repository.
