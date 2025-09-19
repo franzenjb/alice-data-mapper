@@ -3,176 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALICE Data Map - No Login Required</title>
+    <title>ALICE Data Map - Enhanced Demographics</title>
     
-    <!-- Leaflet CSS for mapping without login -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
-    <!-- Chart.js for graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         
-        #map {
+        #map { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100vh;
+            z-index: 1;
+        }
+        
+        /* Loading overlay */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-        }
-        
-        .control-panel {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            width: 380px;
-            max-height: 90vh;
-            overflow-y: auto;
-            z-index: 1000;
-            border-top: 4px solid #ED1B2E;
-        }
-        
-        h2 {
-            margin: 0 0 15px 0;
-            color: #ED1B2E;
-            font-size: 1.3em;
-        }
-        
-        h3, h4 {
-            color: #6D1F2C;
-        }
-        
-        .year-selector {
-            margin: 15px 0;
-        }
-        
-        .year-selector label {
-            font-weight: bold;
-            margin-right: 10px;
-            color: #6D1F2C;
-        }
-        
-        label {
-            color: #6D1F2C;
-            font-weight: 600;
-        }
-        
-        select, input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        select:focus, input:focus {
-            outline: none;
-            border-color: #ED1B2E;
-            box-shadow: 0 0 0 2px rgba(237, 27, 46, 0.1);
-        }
-        
-        .info-box {
-            background: #FFF5F5;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            border-left: 3px solid #ED1B2E;
-        }
-        
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #FFE0E0;
-        }
-        
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-        
-        .stat-label {
-            color: #6D1F2C;
-        }
-        
-        .stat-value {
-            font-weight: bold;
-            color: #ED1B2E;
-        }
-        
-        .legend {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            border-top: 3px solid #ED1B2E;
-        }
-        
-        .legend-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #6D1F2C;
-        }
-        
-        .legend-item {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
-            margin: 5px 0;
-            font-size: 13px;
-            color: #333;
+            justify-content: center;
+            z-index: 9999;
         }
         
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            margin-right: 8px;
-            border: 1px solid #ccc;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .loading-content {
             text-align: center;
-            z-index: 2000;
-            background: white;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            border-top: 4px solid #ED1B2E;
-        }
-        
-        .loading.hidden {
-            display: none;
-        }
-        
-        .loading h3 {
-            color: #ED1B2E;
         }
         
         .spinner {
-            border: 4px solid #FFE0E0;
-            border-top: 4px solid #ED1B2E;
-            border-radius: 50%;
             width: 50px;
             height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ED1B2E;
+            border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 0 auto 20px;
         }
         
         @keyframes spin {
@@ -180,31 +61,55 @@
             100% { transform: rotate(360deg); }
         }
         
-        .tabs {
+        /* Control panel */
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 20px;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .panel-header {
             display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #ED1B2E;
-            margin-bottom: 15px;
-            gap: 2px;
         }
         
-        .tab {
+        .rc-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+        
+        /* Tab navigation */
+        .tab-nav {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
             flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            background: #FFE0E0;
+            padding: 8px 12px;
             border: none;
+            background: #FFE0E0;
+            color: #8B0000;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
             transition: all 0.3s;
-            color: #6D1F2C;
-            font-weight: 600;
-            border-radius: 4px 4px 0 0;
         }
         
-        .tab:hover {
-            background: #FFB3B3;
-        }
-        
-        .tab.active {
+        .tab-btn.active {
             background: #ED1B2E;
             color: white;
         }
@@ -217,172 +122,375 @@
             display: block;
         }
         
-        #trendChart {
-            max-height: 300px;
+        /* Filter sections */
+        .filter-section {
+            margin-bottom: 20px;
         }
         
-        .leaflet-popup-content {
-            min-width: 250px;
-        }
-        
-        .popup-title {
-            font-weight: bold;
-            font-size: 16px;
+        .filter-title {
+            font-weight: 600;
+            color: #333;
             margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #ED1B2E;
-            color: #6D1F2C;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .popup-stat {
+        .demographic-filters {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-option:hover {
+            background: #FFE0E0;
+        }
+        
+        .filter-option.active {
+            background: #ED1B2E;
+            color: white;
+        }
+        
+        .filter-option input {
+            margin-right: 8px;
+        }
+        
+        /* Vulnerability score */
+        .vulnerability-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .vulnerability-score {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .vulnerability-label {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .vulnerability-factors {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        .factor-item {
             display: flex;
             justify-content: space-between;
-            padding: 5px 0;
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
         }
         
-        .popup-stat-label {
-            color: #666;
+        /* Demographic charts */
+        .chart-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
         }
         
-        .popup-stat-value {
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        /* Legend */
+        .legend {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+        
+        /* Range sliders */
+        .range-filter {
+            margin: 15px 0;
+        }
+        
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .range-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ED1B2E;
+            cursor: pointer;
+        }
+        
+        /* Stats display */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
             font-weight: bold;
             color: #ED1B2E;
         }
         
-        button {
-            background: #ED1B2E;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background: #C41E3A;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(237, 27, 46, 0.3);
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
         }
     </style>
 </head>
 <body>
+    <!-- Map container -->
     <div id="map"></div>
     
-    <div class="loading" id="loading">
-        <h3>Loading ALICE Data</h3>
-        <div class="spinner"></div>
-        <p>Fetching county boundaries...</p>
+    <!-- Loading overlay -->
+    <div id="loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Loading Enhanced ALICE Data</h3>
+            <p>Preparing demographic analysis...</p>
+        </div>
     </div>
     
+    <!-- Control Panel -->
     <div class="control-panel">
-        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-            <svg width="50" height="50" viewBox="0 0 100 100" style="margin-right: 15px;">
-                <rect width="100" height="100" fill="#ED1B2E"/>
-                <rect x="40" y="10" width="20" height="80" fill="white"/>
-                <rect x="10" y="40" width="80" height="20" fill="white"/>
+        <div class="panel-header">
+            <svg class="rc-logo" viewBox="0 0 100 100">
+                <rect x="40" y="20" width="20" height="60" fill="#ED1B2E"/>
+                <rect x="20" y="40" width="60" height="20" fill="#ED1B2E"/>
             </svg>
             <div>
-                <h2 style="margin: 0;">ALICE Data Explorer</h2>
-                <p style="font-size: 11px; color: #6D1F2C; margin: 2px 0 0 0;">
-                    American Red Cross • Public Data Portal
-                </p>
+                <h2 style="margin: 0; font-size: 18px;">ALICE Demographics</h2>
+                <p style="margin: 0; font-size: 12px; color: #666;">Enhanced Analysis Tool</p>
             </div>
         </div>
         
-        <div class="year-selector">
-            <label for="yearSelect">Year:</label>
-            <select id="yearSelect">
-                <option value="2023" selected>2023 (Latest)</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
-                <option value="2019">2019</option>
-                <option value="2018">2018</option>
-                <option value="2016">2016</option>
-                <option value="2014">2014</option>
-                <option value="2012">2012</option>
-                <option value="2010">2010</option>
-            </select>
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('filters')">Filters</button>
+            <button class="tab-btn" onclick="switchTab('vulnerability')">Vulnerability</button>
+            <button class="tab-btn" onclick="switchTab('demographics')">Demographics</button>
+            <button class="tab-btn" onclick="switchTab('analysis')">Analysis</button>
         </div>
         
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('search')">Search</button>
-            <button class="tab" onclick="switchTab('trends')">Trends</button>
-            <button class="tab" onclick="switchTab('data')">Data</button>
+        <!-- Filters Tab -->
+        <div id="filters-tab" class="tab-content active">
+            <div class="filter-section">
+                <div class="filter-title">Primary Data Layer</div>
+                <select id="dataLayer" class="form-select">
+                    <option value="combined">ALICE + Poverty Rate</option>
+                    <option value="alice">ALICE Rate Only</option>
+                    <option value="poverty">Poverty Rate Only</option>
+                    <option value="vulnerability">Vulnerability Score</option>
+                </select>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">Demographic Filters</div>
+                <div class="demographic-filters">
+                    <div class="filter-option" data-filter="elderly">
+                        <input type="checkbox" id="filter-elderly">
+                        <label for="filter-elderly">High Elderly Population (>20% over 65)</label>
+                    </div>
+                    <div class="filter-option" data-filter="children">
+                        <input type="checkbox" id="filter-children">
+                        <label for="filter-children">Many Children (>30% under 18)</label>
+                    </div>
+                    <div class="filter-option" data-filter="single-parent">
+                        <input type="checkbox" id="filter-single-parent">
+                        <label for="filter-single-parent">Single Parent Households (>15%)</label>
+                    </div>
+                    <div class="filter-option" data-filter="minority">
+                        <input type="checkbox" id="filter-minority">
+                        <label for="filter-minority">Majority Minority Counties</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">ALICE Rate Range</div>
+                <div class="range-filter">
+                    <div class="range-label">
+                        <span>Min: <span id="alice-min-val">0</span>%</span>
+                        <span>Max: <span id="alice-max-val">100</span>%</span>
+                    </div>
+                    <input type="range" class="range-slider" id="alice-min" min="0" max="100" value="0">
+                    <input type="range" class="range-slider" id="alice-max" min="0" max="100" value="100">
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">State Filter</div>
+                <select id="stateFilter" class="form-select">
+                    <option value="">All States</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-danger w-100" onclick="applyFilters()">Apply Filters</button>
         </div>
         
-        <div id="searchTab" class="tab-content active">
-            <label for="stateFilter">State:</label>
-            <select id="stateFilter">
-                <option value="">All States</option>
-            </select>
+        <!-- Vulnerability Tab -->
+        <div id="vulnerability-tab" class="tab-content">
+            <div class="vulnerability-card">
+                <div class="vulnerability-label">County Vulnerability Score</div>
+                <div class="vulnerability-score" id="vuln-score">--</div>
+                <div class="vulnerability-label">Click a county to analyze</div>
+                <div class="vulnerability-factors" id="vuln-factors"></div>
+            </div>
             
-            <label for="countySearch">Search County:</label>
-            <input type="text" id="countySearch" placeholder="Type county name..." list="countyList">
-            <datalist id="countyList"></datalist>
+            <div class="filter-section">
+                <div class="filter-title">Vulnerability Factors</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="vuln-alice">--</div>
+                        <div class="stat-label">ALICE + Poverty</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="vuln-elderly">--</div>
+                        <div class="stat-label">Elderly (65+)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="vuln-single">--</div>
+                        <div class="stat-label">Single Parents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="vuln-disabled">--</div>
+                        <div class="stat-label">Disability Rate</div>
+                    </div>
+                </div>
+            </div>
             
-            <button onclick="resetFilters()">Reset Filters</button>
-            
-            <div class="info-box">
-                <h4 style="margin-top: 0;">Summary</h4>
-                <div class="stat-row">
-                    <span class="stat-label">Counties Loaded:</span>
-                    <span class="stat-value" id="countiesLoaded">0</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Avg ALICE Rate:</span>
-                    <span class="stat-value" id="avgAliceRate">0%</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Avg Poverty Rate:</span>
-                    <span class="stat-value" id="avgPovertyRate">0%</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Data Year:</span>
-                    <span class="stat-value" id="dataYear">2023</span>
-                </div>
+            <div class="filter-section">
+                <button class="btn btn-primary w-100" onclick="findMostVulnerable()">
+                    Find Most Vulnerable Counties
+                </button>
+                <button class="btn btn-outline-primary w-100 mt-2" onclick="exportVulnerabilityReport()">
+                    Export Vulnerability Report
+                </button>
             </div>
         </div>
         
-        <div id="trendsTab" class="tab-content">
-            <h4>Click a county to see trends</h4>
-            <canvas id="trendChart" style="display: none;"></canvas>
-            <div id="selectedCountyInfo"></div>
+        <!-- Demographics Tab -->
+        <div id="demographics-tab" class="tab-content">
+            <div class="chart-container">
+                <div class="chart-title">Age Distribution</div>
+                <canvas id="ageChart" width="350" height="200"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">Household Types</div>
+                <canvas id="householdChart" width="350" height="200"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-title">Race/Ethnicity</div>
+                <canvas id="raceChart" width="350" height="200"></canvas>
+            </div>
         </div>
         
-        <div id="dataTab" class="tab-content">
-            <p style="font-size: 13px; color: #666;">
-                Data from United Way ALICE Project<br>
-                Total records: <strong id="totalRecords">0</strong>
-            </p>
-            <button onclick="exportData()">Export Current View</button>
+        <!-- Analysis Tab -->
+        <div id="analysis-tab" class="tab-content">
+            <div class="filter-section">
+                <div class="filter-title">Advanced Analysis</div>
+                <button class="btn btn-primary w-100 mb-2" onclick="runCorrelationAnalysis()">
+                    Correlation Analysis
+                </button>
+                <button class="btn btn-primary w-100 mb-2" onclick="identifyHotspots()">
+                    Identify Crisis Hotspots
+                </button>
+                <button class="btn btn-primary w-100 mb-2" onclick="compareCounties()">
+                    Compare Similar Counties
+                </button>
+            </div>
+            
+            <div id="analysis-results" class="chart-container" style="display: none;">
+                <div class="chart-title">Analysis Results</div>
+                <div id="results-content"></div>
+            </div>
         </div>
     </div>
     
+    <!-- Legend -->
     <div class="legend">
-        <div class="legend-title">ALICE + Poverty Rate</div>
+        <div class="legend-title">Vulnerability Score</div>
         <div class="legend-item">
             <div class="legend-color" style="background: #00C853;"></div>
-            <span>&lt; 25%</span>
+            <span>Low (0-25)</span>
         </div>
         <div class="legend-item">
             <div class="legend-color" style="background: #FFD600;"></div>
-            <span>25% - 35%</span>
+            <span>Moderate (25-50)</span>
         </div>
         <div class="legend-item">
             <div class="legend-color" style="background: #FF9800;"></div>
-            <span>35% - 45%</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #FF5722;"></div>
-            <span>45% - 55%</span>
+            <span>High (50-75)</span>
         </div>
         <div class="legend-item">
             <div class="legend-color" style="background: #D32F2F;"></div>
-            <span>&gt; 55%</span>
+            <span>Critical (75-100)</span>
         </div>
     </div>
     
@@ -390,169 +498,399 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
+        // Global variables
         let map;
         let aliceData = [];
+        let demographicData = {};
         let countyLayer;
-        let currentYear = 2023;
-        let trendChart = null;
         let countyBoundaries = new Map();
+        let currentCounty = null;
+        let charts = {};
         
         // Initialize map
         function initMap() {
             map = L.map('map').setView([39.5, -98.5], 5);
             
-            // Add OpenStreetMap tiles (no login required!)
+            // Add OpenStreetMap tiles
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
             
-            loadData();
+            loadEnhancedData();
         }
         
-        // Load ALICE data and county boundaries
-        async function loadData() {
+        // Load enhanced ALICE data with demographics
+        async function loadEnhancedData() {
             try {
-                // Load ALICE data
-                const aliceResponse = await fetch('alice_master_database.json');
-                aliceData = await aliceResponse.json();
-                console.log(`Loaded ${aliceData.length} ALICE records`);
+                // Try to load enhanced database first
+                let response = await fetch('alice_master_enhanced.json');
+                let enhancedData;
                 
-                document.getElementById('totalRecords').textContent = aliceData.length.toLocaleString();
+                if (response.ok) {
+                    enhancedData = await response.json();
+                    aliceData = enhancedData.data || [];
+                    console.log(`Loaded ${aliceData.length} enhanced records`);
+                } else {
+                    // Fall back to original database
+                    response = await fetch('alice_master_database.json');
+                    aliceData = await response.json();
+                    console.log(`Loaded ${aliceData.length} standard records`);
+                }
                 
                 // Populate state filter
-                const states = [...new Set(aliceData.map(d => d.state))].sort();
-                const stateSelect = document.getElementById('stateFilter');
-                states.forEach(state => {
-                    const option = document.createElement('option');
-                    option.value = state;
-                    option.textContent = state;
-                    stateSelect.appendChild(option);
-                });
+                populateStateFilter();
                 
-                // Load US county boundaries from public GeoJSON
-                // Using US Census Bureau public data - no login required!
-                const geoResponse = await fetch('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json');
-                const geoData = await geoResponse.json();
+                // Load county boundaries
+                await loadCountyBoundaries();
                 
-                // Create county layer with ALICE data
-                createCountyLayer(geoData);
+                // Initial map display
+                displayMap();
                 
-                // Hide loading
-                document.getElementById('loading').classList.add('hidden');
+                // Hide loading overlay
+                document.getElementById('loading').style.display = 'none';
                 
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('loading').innerHTML = 
-                    '<h3>Error Loading Data</h3><p>Please check your connection and refresh.</p>';
+                document.querySelector('.loading-content h3').textContent = 'Error Loading Data';
+                document.querySelector('.loading-content p').textContent = 'Please check your connection and refresh.';
             }
         }
         
-        // Create county layer with choropleth colors
-        function createCountyLayer(geoData) {
-            const yearData = getDataForYear(currentYear);
-            const dataMap = new Map();
+        // Load county boundaries
+        async function loadCountyBoundaries() {
+            const response = await fetch('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json');
+            const geoData = await response.json();
             
-            // Create lookup map
-            yearData.forEach(record => {
-                dataMap.set(record.geoID, record);
+            geoData.features.forEach(feature => {
+                const fips = feature.id || feature.properties.FIPS || feature.properties.GEO_ID;
+                if (fips) {
+                    countyBoundaries.set(fips, {
+                        feature: feature,
+                        bounds: L.geoJSON(feature).getBounds()
+                    });
+                }
             });
             
-            // Add counties to map
-            countyLayer = L.geoJSON(geoData, {
+            console.log(`Loaded ${countyBoundaries.size} county boundaries`);
+        }
+        
+        // Calculate vulnerability score
+        function calculateVulnerabilityScore(record) {
+            let score = 0;
+            let factors = [];
+            
+            // Base ALICE/Poverty score (0-40 points)
+            const combinedRate = parseFloat(record.combinedRate || 0);
+            const aliceScore = Math.min(combinedRate * 0.4, 40);
+            score += aliceScore;
+            factors.push({name: 'ALICE + Poverty', value: aliceScore.toFixed(1)});
+            
+            // Demographics scoring (if available)
+            if (record.demographics) {
+                // Elderly population (0-20 points)
+                if (record.demographics.age_groups && record.demographics.age_groups.over_65) {
+                    const elderlyScore = Math.min(record.demographics.age_groups.over_65 * 0.8, 20);
+                    score += elderlyScore;
+                    factors.push({name: 'Elderly Population', value: elderlyScore.toFixed(1)});
+                }
+                
+                // Single parent households (0-20 points)
+                if (record.demographics.household_types) {
+                    const singleParentRate = (
+                        (record.demographics.household_types.single_female_with_children || 0) +
+                        (record.demographics.household_types.single_male_with_children || 0)
+                    );
+                    const singleScore = Math.min(singleParentRate * 1.0, 20);
+                    score += singleScore;
+                    factors.push({name: 'Single Parents', value: singleScore.toFixed(1)});
+                }
+                
+                // Minority population (0-20 points)
+                if (record.demographics.race_ethnicity) {
+                    const minorityRate = 100 - (record.demographics.race_ethnicity.white || 0);
+                    const minorityScore = Math.min(minorityRate * 0.2, 20);
+                    score += minorityScore;
+                    factors.push({name: 'Diversity Factor', value: minorityScore.toFixed(1)});
+                }
+            }
+            
+            return {
+                total: Math.min(score, 100),
+                factors: factors
+            };
+        }
+        
+        // Display map with filters
+        function displayMap(filters = {}) {
+            if (countyLayer) {
+                map.removeLayer(countyLayer);
+            }
+            
+            // Filter data
+            let filteredData = aliceData.filter(d => {
+                if (d.geoLevel !== 'county') return false;
+                if (d.year !== 2023 && d.year !== 2022) return false;
+                
+                // Apply demographic filters
+                if (filters.elderly && d.demographics?.age_groups?.over_65 < 20) return false;
+                if (filters.children && d.demographics?.age_groups?.under_25 < 30) return false;
+                if (filters.singleParent && d.demographics?.household_types) {
+                    const sp = (d.demographics.household_types.single_female_with_children || 0) +
+                              (d.demographics.household_types.single_male_with_children || 0);
+                    if (sp < 15) return false;
+                }
+                if (filters.minority && d.demographics?.race_ethnicity?.white >= 50) return false;
+                
+                // Apply ALICE rate filter
+                const aliceRate = parseFloat(d.aliceRate || 0);
+                if (filters.aliceMin && aliceRate < filters.aliceMin) return false;
+                if (filters.aliceMax && aliceRate > filters.aliceMax) return false;
+                
+                // Apply state filter
+                if (filters.state && d.state !== filters.state) return false;
+                
+                return true;
+            });
+            
+            // Create data map
+            const dataMap = new Map();
+            filteredData.forEach(d => {
+                dataMap.set(d.geoID, d);
+            });
+            
+            // Create GeoJSON layer
+            const geoJsonData = {
+                type: 'FeatureCollection',
+                features: Array.from(countyBoundaries.values()).map(item => item.feature)
+            };
+            
+            countyLayer = L.geoJSON(geoJsonData, {
                 style: function(feature) {
-                    const fips = feature.id || feature.properties.FIPS || feature.properties.GEO_ID;
-                    const aliceRecord = dataMap.get(fips) || getLatestDataForCounty(fips);
+                    const fips = feature.id || feature.properties.FIPS;
+                    const record = dataMap.get(fips);
                     
-                    let fillColor = '#CCCCCC'; // Default gray
-                    let fillOpacity = 0.7;
+                    if (!record) {
+                        return {
+                            fillColor: '#ccc',
+                            fillOpacity: 0.1,
+                            weight: 0.5,
+                            color: 'white'
+                        };
+                    }
                     
-                    if (aliceRecord) {
-                        const combinedRate = parseFloat(aliceRecord.combinedRate) || 0;
-                        fillColor = getColorForRate(combinedRate);
-                        
-                        // Store for later use
-                        countyBoundaries.set(fips, {
-                            feature: feature,
-                            data: aliceRecord
-                        });
+                    // Color based on selected layer
+                    const layerType = document.getElementById('dataLayer').value;
+                    let value, fillColor;
+                    
+                    if (layerType === 'vulnerability') {
+                        const vuln = calculateVulnerabilityScore(record);
+                        value = vuln.total;
+                        fillColor = getVulnerabilityColor(value);
+                    } else {
+                        value = parseFloat(record[layerType + 'Rate'] || record.combinedRate || 0);
+                        fillColor = getColorForRate(value);
                     }
                     
                     return {
                         fillColor: fillColor,
-                        fillOpacity: fillOpacity,
+                        fillOpacity: 0.7,
                         weight: 0.5,
                         color: 'white'
                     };
                 },
                 onEachFeature: function(feature, layer) {
-                    const fips = feature.id || feature.properties.FIPS || feature.properties.GEO_ID;
-                    const aliceRecord = dataMap.get(fips) || getLatestDataForCounty(fips);
+                    const fips = feature.id || feature.properties.FIPS;
+                    const record = dataMap.get(fips);
                     
-                    if (aliceRecord) {
-                        // Store county feature for zooming
-                        const countyKey = `${aliceRecord.state}-${aliceRecord.county}`.toLowerCase();
-                        countyFeatures[countyKey] = layer;
+                    if (record) {
+                        layer.on('click', function() {
+                            showCountyDetails(record);
+                        });
                         
-                        // Create popup
+                        // Popup
+                        const vuln = calculateVulnerabilityScore(record);
                         const popupContent = `
-                            <div class="popup-title">${aliceRecord.county}, ${aliceRecord.state}</div>
-                            <div class="popup-stat">
-                                <span class="popup-stat-label">Year:</span>
-                                <span class="popup-stat-value">${aliceRecord.year}</span>
-                            </div>
-                            <div class="popup-stat">
-                                <span class="popup-stat-label">ALICE Rate:</span>
-                                <span class="popup-stat-value">${aliceRecord.aliceRate}%</span>
-                            </div>
-                            <div class="popup-stat">
-                                <span class="popup-stat-label">Poverty Rate:</span>
-                                <span class="popup-stat-value">${aliceRecord.povertyRate}%</span>
-                            </div>
-                            <div class="popup-stat">
-                                <span class="popup-stat-label">Combined:</span>
-                                <span class="popup-stat-value">${aliceRecord.combinedRate}%</span>
-                            </div>
-                            <div class="popup-stat">
-                                <span class="popup-stat-label">Total Households:</span>
-                                <span class="popup-stat-value">${aliceRecord.totalHouseholds?.toLocaleString() || 'N/A'}</span>
+                            <div style="min-width: 200px;">
+                                <h4>${record.county}, ${record.state}</h4>
+                                <div>ALICE Rate: ${record.aliceRate}%</div>
+                                <div>Poverty Rate: ${record.povertyRate}%</div>
+                                <div>Combined: ${record.combinedRate}%</div>
+                                <div style="margin-top: 10px; font-weight: bold;">
+                                    Vulnerability Score: ${vuln.total.toFixed(0)}/100
+                                </div>
                             </div>
                         `;
-                        
                         layer.bindPopup(popupContent);
-                        
-                        // Click handler for trends
-                        layer.on('click', function() {
-                            showTrendsForCounty(fips, aliceRecord.county, aliceRecord.state);
-                        });
                     }
                 }
             }).addTo(map);
+        }
+        
+        // Show county details
+        function showCountyDetails(record) {
+            currentCounty = record;
             
-            updateStats();
-            document.getElementById('countiesLoaded').textContent = countyBoundaries.size;
-        }
-        
-        // Get data for specific year
-        function getDataForYear(year) {
-            return aliceData.filter(d => 
-                d.year === parseInt(year) && 
-                d.geoLevel === 'county'
-            );
-        }
-        
-        // Get latest data for a county
-        function getLatestDataForCounty(fips) {
-            const countyData = aliceData.filter(d => 
-                d.geoID === fips && 
-                d.geoLevel === 'county'
-            ).sort((a, b) => b.year - a.year);
+            // Update vulnerability tab
+            const vuln = calculateVulnerabilityScore(record);
+            document.getElementById('vuln-score').textContent = vuln.total.toFixed(0);
             
-            return countyData[0] || null;
+            // Update factors
+            let factorsHtml = '';
+            vuln.factors.forEach(factor => {
+                factorsHtml += `
+                    <div class="factor-item">
+                        <span>${factor.name}</span>
+                        <span>${factor.value}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('vuln-factors').innerHTML = factorsHtml;
+            
+            // Update stats
+            document.getElementById('vuln-alice').textContent = record.combinedRate + '%';
+            
+            if (record.demographics) {
+                document.getElementById('vuln-elderly').textContent = 
+                    (record.demographics.age_groups?.over_65 || '--') + '%';
+                    
+                const singleParents = (
+                    (record.demographics.household_types?.single_female_with_children || 0) +
+                    (record.demographics.household_types?.single_male_with_children || 0)
+                );
+                document.getElementById('vuln-single').textContent = singleParents.toFixed(1) + '%';
+                
+                // Update demographic charts
+                updateDemographicCharts(record.demographics);
+            }
+            
+            // Switch to vulnerability tab
+            switchTab('vulnerability');
         }
         
-        // Get color based on combined rate
-        function getColorForRate(combinedRate) {
-            const rate = parseFloat(combinedRate);
+        // Update demographic charts
+        function updateDemographicCharts(demographics) {
+            // Age chart
+            if (demographics.age_groups) {
+                updateAgeChart(demographics.age_groups);
+            }
+            
+            // Household chart
+            if (demographics.household_types) {
+                updateHouseholdChart(demographics.household_types);
+            }
+            
+            // Race chart
+            if (demographics.race_ethnicity) {
+                updateRaceChart(demographics.race_ethnicity);
+            }
+        }
+        
+        function updateAgeChart(ageData) {
+            const ctx = document.getElementById('ageChart').getContext('2d');
+            
+            if (charts.age) {
+                charts.age.destroy();
+            }
+            
+            charts.age = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Under 25', '25-44', '45-64', '65+'],
+                    datasets: [{
+                        data: [
+                            ageData.under_25 || 25,
+                            ageData.age_25_44 || 25,
+                            ageData.age_45_64 || 25,
+                            ageData.over_65 || 25
+                        ],
+                        backgroundColor: [
+                            '#4CAF50',
+                            '#2196F3',
+                            '#FF9800',
+                            '#F44336'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function updateHouseholdChart(householdData) {
+            const ctx = document.getElementById('householdChart').getContext('2d');
+            
+            if (charts.household) {
+                charts.household.destroy();
+            }
+            
+            charts.household = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Married w/ Children', 'Single Mother', 'Single Father', 'Non-family'],
+                    datasets: [{
+                        label: '% of Households',
+                        data: [
+                            householdData.married_with_children || 0,
+                            householdData.single_female_with_children || 0,
+                            householdData.single_male_with_children || 0,
+                            householdData.nonfamily_households || 0
+                        ],
+                        backgroundColor: '#ED1B2E'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 50
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateRaceChart(raceData) {
+            const ctx = document.getElementById('raceChart').getContext('2d');
+            
+            if (charts.race) {
+                charts.race.destroy();
+            }
+            
+            charts.race = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['White', 'Black', 'Hispanic', 'Asian', 'Other'],
+                    datasets: [{
+                        data: [
+                            raceData.white || 0,
+                            raceData.black || 0,
+                            raceData.hispanic || 0,
+                            raceData.asian || 0,
+                            (raceData.other || 0) + (raceData.two_or_more || 0) + 
+                            (raceData.native_american || 0) + (raceData.pacific_islander || 0)
+                        ],
+                        backgroundColor: [
+                            '#E3F2FD',
+                            '#8B4513',
+                            '#FFA726',
+                            '#FFD54F',
+                            '#A5D6A7'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        // Helper functions
+        function getColorForRate(rate) {
             if (rate < 25) return '#00C853';
             if (rate < 35) return '#FFD600';
             if (rate < 45) return '#FF9800';
@@ -560,382 +898,112 @@
             return '#D32F2F';
         }
         
-        // Update statistics
-        function updateStats() {
-            const yearData = getDataForYear(currentYear);
-            if (yearData.length === 0) return;
-            
-            const avgAlice = yearData.reduce((sum, d) => sum + parseFloat(d.aliceRate || 0), 0) / yearData.length;
-            const avgPoverty = yearData.reduce((sum, d) => sum + parseFloat(d.povertyRate || 0), 0) / yearData.length;
-            
-            document.getElementById('avgAliceRate').textContent = avgAlice.toFixed(1) + '%';
-            document.getElementById('avgPovertyRate').textContent = avgPoverty.toFixed(1) + '%';
-            document.getElementById('dataYear').textContent = currentYear;
+        function getVulnerabilityColor(score) {
+            if (score < 25) return '#00C853';
+            if (score < 50) return '#FFD600';
+            if (score < 75) return '#FF9800';
+            return '#D32F2F';
         }
         
-        // Show trends for county
-        function showTrendsForCounty(fips, countyName, stateName) {
-            switchTab('trends');
+        function switchTab(tabName) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
             
-            const trendData = aliceData.filter(d => 
-                d.geoID === fips && 
-                d.geoLevel === 'county'
-            ).sort((a, b) => a.year - b.year);
-            
-            if (trendData.length === 0) {
-                document.getElementById('selectedCountyInfo').innerHTML = 
-                    '<p>No trend data available</p>';
-                return;
-            }
-            
-            document.getElementById('selectedCountyInfo').innerHTML = 
-                `<h4>${countyName}, ${stateName}</h4>`;
-            
-            // Show chart
-            const canvas = document.getElementById('trendChart');
-            canvas.style.display = 'block';
-            
-            if (trendChart) {
-                trendChart.destroy();
-            }
-            
-            trendChart = new Chart(canvas.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: trendData.map(d => d.year),
-                    datasets: [
-                        {
-                            label: 'ALICE Rate',
-                            data: trendData.map(d => parseFloat(d.aliceRate) || 0),
-                            borderColor: '#FF9800',
-                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Poverty Rate',
-                            data: trendData.map(d => parseFloat(d.povertyRate) || 0),
-                            borderColor: '#F44336',
-                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Combined Rate',
-                            data: trendData.map(d => parseFloat(d.combinedRate) || 0),
-                            borderColor: '#9C27B0',
-                            backgroundColor: 'rgba(156, 39, 176, 0.1)',
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'ALICE & Poverty Trends'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    }
-                }
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+        
+        function populateStateFilter() {
+            const states = [...new Set(aliceData.map(d => d.state))].sort();
+            const select = document.getElementById('stateFilter');
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state;
+                select.appendChild(option);
             });
         }
         
-        // Switch tabs
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        function applyFilters() {
+            const filters = {
+                elderly: document.getElementById('filter-elderly').checked,
+                children: document.getElementById('filter-children').checked,
+                singleParent: document.getElementById('filter-single-parent').checked,
+                minority: document.getElementById('filter-minority').checked,
+                aliceMin: parseInt(document.getElementById('alice-min').value),
+                aliceMax: parseInt(document.getElementById('alice-max').value),
+                state: document.getElementById('stateFilter').value
+            };
             
-            if (tab === 'search') {
-                document.querySelector('.tab:nth-child(1)').classList.add('active');
-                document.getElementById('searchTab').classList.add('active');
-            } else if (tab === 'trends') {
-                document.querySelector('.tab:nth-child(2)').classList.add('active');
-                document.getElementById('trendsTab').classList.add('active');
-            } else {
-                document.querySelector('.tab:nth-child(3)').classList.add('active');
-                document.getElementById('dataTab').classList.add('active');
-            }
+            displayMap(filters);
         }
         
-        // Reset filters
-        function resetFilters() {
-            document.getElementById('stateFilter').value = '';
-            document.getElementById('countySearch').value = '';
-            map.setView([39.5, -98.5], 5);
+        function findMostVulnerable() {
+            // Calculate vulnerability for all counties
+            const vulnerableCounties = aliceData
+                .filter(d => d.geoLevel === 'county' && d.year >= 2022)
+                .map(d => ({
+                    ...d,
+                    vulnerability: calculateVulnerabilityScore(d)
+                }))
+                .sort((a, b) => b.vulnerability.total - a.vulnerability.total)
+                .slice(0, 20);
+            
+            // Display results
+            let html = '<h4>Top 20 Most Vulnerable Counties</h4><ol>';
+            vulnerableCounties.forEach(county => {
+                html += `<li>${county.county}, ${county.state} - Score: ${county.vulnerability.total.toFixed(0)}</li>`;
+            });
+            html += '</ol>';
+            
+            document.getElementById('results-content').innerHTML = html;
+            document.getElementById('analysis-results').style.display = 'block';
+            switchTab('analysis');
         }
         
-        // Export data
-        function exportData() {
-            const yearData = getDataForYear(currentYear);
-            const csv = convertToCSV(yearData);
-            downloadCSV(csv, `alice_data_${currentYear}.csv`);
-        }
-        
-        function convertToCSV(data) {
-            const headers = Object.keys(data[0]);
-            const csvHeaders = headers.join(',');
-            const csvRows = data.map(row => 
-                headers.map(header => JSON.stringify(row[header] || '')).join(',')
-            );
-            return csvHeaders + '\n' + csvRows.join('\n');
-        }
-        
-        function downloadCSV(csv, filename) {
+        function exportVulnerabilityReport() {
+            // Create CSV report
+            let csv = 'County,State,ALICE_Rate,Poverty_Rate,Combined_Rate,Vulnerability_Score,Elderly_Pct,Single_Parent_Pct\n';
+            
+            aliceData
+                .filter(d => d.geoLevel === 'county' && d.year >= 2022)
+                .forEach(d => {
+                    const vuln = calculateVulnerabilityScore(d);
+                    const sp = d.demographics?.household_types ? 
+                        (d.demographics.household_types.single_female_with_children || 0) +
+                        (d.demographics.household_types.single_male_with_children || 0) : 0;
+                    
+                    csv += `"${d.county}","${d.state}",${d.aliceRate},${d.povertyRate},${d.combinedRate},`;
+                    csv += `${vuln.total.toFixed(0)},${d.demographics?.age_groups?.over_65 || 'N/A'},${sp.toFixed(1)}\n`;
+                });
+            
+            // Download
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
+            a.download = 'vulnerability_report.csv';
             a.click();
         }
         
-        // Event listeners
-        document.getElementById('yearSelect').addEventListener('change', function(e) {
-            currentYear = parseInt(e.target.value);
-            if (countyLayer) {
-                map.removeLayer(countyLayer);
-            }
-            countyFeatures = {}; // Reset county features
-            loadData();
-        });
-        
-        // State centers for zooming
-        const stateCenters = {
-            'Alabama': [32.806671, -86.791130, 7],
-            'Alaska': [61.370716, -152.404419, 4],
-            'Arizona': [33.729759, -111.431221, 6],
-            'Arkansas': [34.969704, -92.373123, 7],
-            'California': [36.116203, -119.681564, 6],
-            'Colorado': [39.059811, -105.311104, 7],
-            'Connecticut': [41.597782, -72.755371, 9],
-            'Delaware': [39.318523, -75.507141, 9],
-            'Florida': [27.766279, -81.686783, 6],
-            'Georgia': [33.040619, -83.643074, 7],
-            'Hawaii': [21.094318, -157.498337, 7],
-            'Idaho': [44.240459, -114.478828, 6],
-            'Illinois': [40.349457, -88.986137, 7],
-            'Indiana': [39.849426, -86.258278, 7],
-            'Iowa': [42.011539, -93.210526, 7],
-            'Kansas': [38.526600, -96.726486, 7],
-            'Kentucky': [37.668140, -84.670067, 7],
-            'Louisiana': [31.169546, -91.867805, 7],
-            'Maine': [44.693947, -69.381927, 7],
-            'Maryland': [39.063946, -76.802101, 8],
-            'Massachusetts': [42.230171, -71.530106, 8],
-            'Michigan': [43.326618, -84.536095, 7],
-            'Minnesota': [45.694454, -93.900192, 6],
-            'Mississippi': [32.741646, -89.678696, 7],
-            'Missouri': [38.456085, -92.288368, 7],
-            'Montana': [46.921925, -110.454353, 6],
-            'Nebraska': [41.125370, -98.268082, 7],
-            'Nevada': [38.313515, -117.055374, 6],
-            'New Hampshire': [43.452492, -71.563896, 8],
-            'New Jersey': [40.298904, -74.521011, 8],
-            'New Mexico': [34.840515, -106.248482, 6],
-            'New York': [42.165726, -74.948051, 7],
-            'North Carolina': [35.630066, -79.806419, 7],
-            'North Dakota': [47.528912, -99.784012, 7],
-            'Ohio': [40.388783, -82.764915, 7],
-            'Oklahoma': [35.565342, -96.928917, 7],
-            'Oregon': [43.804133, -120.554201, 6],
-            'Pennsylvania': [40.590752, -77.209755, 7],
-            'Rhode Island': [41.680893, -71.511780, 10],
-            'South Carolina': [33.856892, -80.945007, 7],
-            'South Dakota': [44.299782, -99.438828, 7],
-            'Tennessee': [35.747845, -86.692345, 7],
-            'Texas': [31.054487, -97.563461, 6],
-            'Utah': [40.150032, -111.862434, 6],
-            'Vermont': [44.045876, -72.710686, 8],
-            'Virginia': [37.769337, -78.169968, 7],
-            'Washington': [47.400902, -121.490494, 7],
-            'West Virginia': [38.491226, -80.954456, 7],
-            'Wisconsin': [44.268543, -89.616508, 7],
-            'Wyoming': [42.755966, -107.302490, 6]
-        };
-        
-        // Keep track of county features for zooming
-        let countyFeatures = {};
-        
-        document.getElementById('stateFilter').addEventListener('change', function(e) {
-            const state = e.target.value;
+        // Range slider updates
+        document.addEventListener('DOMContentLoaded', function() {
+            const aliceMin = document.getElementById('alice-min');
+            const aliceMax = document.getElementById('alice-max');
             
-            // Clear county search when state changes
-            document.getElementById('countySearch').value = '';
-            const datalist = document.getElementById('countyList');
-            datalist.innerHTML = '';
+            aliceMin?.addEventListener('input', function() {
+                document.getElementById('alice-min-val').textContent = this.value;
+            });
             
-            if (state) {
-                // Zoom to state
-                const center = stateCenters[state];
-                if (center) {
-                    map.setView([center[0], center[1]], center[2]);
-                }
-                
-                // Update county search placeholder
-                document.getElementById('countySearch').placeholder = `Search counties in ${state}...`;
-                
-                // Populate county dropdown with all counties in the selected state
-                const stateCounties = aliceData.filter(d => 
-                    d.state === state && 
-                    d.year === currentYear && 
-                    d.geoLevel === 'county' &&
-                    d.county
-                );
-                
-                // Remove duplicates
-                const uniqueCounties = [];
-                const seen = new Set();
-                stateCounties.forEach(d => {
-                    if (!seen.has(d.county)) {
-                        seen.add(d.county);
-                        uniqueCounties.push(d);
-                    }
-                });
-                
-                // Sort counties alphabetically
-                uniqueCounties.sort((a, b) => a.county.localeCompare(b.county));
-                
-                // Add all counties to datalist
-                uniqueCounties.forEach(county => {
-                    const option = document.createElement('option');
-                    option.value = county.county;
-                    option.label = county.county;
-                    datalist.appendChild(option);
-                });
-                
-                console.log(`Populated ${uniqueCounties.length} counties for ${state}`);
-            } else {
-                // Reset to US view
-                map.setView([39.5, -98.5], 5);
-                document.getElementById('countySearch').placeholder = 'Type county name...';
-            }
-        });
-        
-        // Handle county search
-        function handleCountySearch(searchValue) {
-            const search = searchValue.toLowerCase().trim();
-            const selectedState = document.getElementById('stateFilter').value;
-            
-            if (search.length >= 1) {
-                // Find matching counties
-                let matches = aliceData.filter(d => {
-                    if (!d.county || d.year !== currentYear || d.geoLevel !== 'county') return false;
-                    
-                    // If state is selected, only search within that state
-                    if (selectedState && d.state !== selectedState) return false;
-                    
-                    return d.county.toLowerCase().includes(search);
-                });
-                
-                // Remove duplicates (same county might appear multiple times)
-                const uniqueMatches = [];
-                const seen = new Set();
-                matches.forEach(m => {
-                    const key = `${m.state}-${m.county}`;
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        uniqueMatches.push(m);
-                    }
-                });
-                
-                // Only update datalist if user is actively typing (not just focusing)
-                if (search.length > 0) {
-                    // Update datalist with filtered suggestions
-                    const datalist = document.getElementById('countyList');
-                    datalist.innerHTML = '';
-                    uniqueMatches.slice(0, 20).forEach(match => {
-                        const option = document.createElement('option');
-                        option.value = match.county;
-                        option.label = selectedState ? match.county : `${match.county}, ${match.state}`;
-                        datalist.appendChild(option);
-                    });
-                }
-                
-                // Check for exact match and zoom
-                const exactMatch = uniqueMatches.find(m => 
-                    m.county.toLowerCase() === search || 
-                    m.county.toLowerCase() === searchValue.toLowerCase()
-                );
-                
-                if (exactMatch) {
-                    // Zoom to county using the stored county features
-                    const countyKey = `${exactMatch.state}-${exactMatch.county}`.toLowerCase();
-                    const layer = countyFeatures[countyKey];
-                    
-                    if (layer) {
-                        // Zoom to the county bounds
-                        const bounds = layer.getBounds();
-                        map.fitBounds(bounds, { padding: [50, 50] });
-                        
-                        // Open popup for this county
-                        setTimeout(() => {
-                            layer.openPopup();
-                        }, 500);
-                        
-                        // Automatically show trends for this county
-                        showTrendsForCounty(exactMatch.geoID, exactMatch.county, exactMatch.state);
-                    }
-                }
-            }
-        }
-        
-        // County search focus event - show all counties when field is clicked
-        document.getElementById('countySearch').addEventListener('focus', function(e) {
-            const selectedState = document.getElementById('stateFilter').value;
-            
-            if (selectedState && e.target.value === '') {
-                // Show all counties for the selected state
-                const datalist = document.getElementById('countyList');
-                datalist.innerHTML = '';
-                
-                const stateCounties = aliceData.filter(d => 
-                    d.state === selectedState && 
-                    d.year === currentYear && 
-                    d.geoLevel === 'county' &&
-                    d.county
-                );
-                
-                // Remove duplicates
-                const uniqueCounties = [];
-                const seen = new Set();
-                stateCounties.forEach(d => {
-                    if (!seen.has(d.county)) {
-                        seen.add(d.county);
-                        uniqueCounties.push(d);
-                    }
-                });
-                
-                // Sort counties alphabetically
-                uniqueCounties.sort((a, b) => a.county.localeCompare(b.county));
-                
-                // Add all counties to datalist
-                uniqueCounties.forEach(county => {
-                    const option = document.createElement('option');
-                    option.value = county.county;
-                    option.label = county.county;
-                    datalist.appendChild(option);
-                });
-            }
-        });
-        
-        // County search input event
-        document.getElementById('countySearch').addEventListener('input', function(e) {
-            handleCountySearch(e.target.value);
-        });
-        
-        // County search change event (for when user selects from datalist)
-        document.getElementById('countySearch').addEventListener('change', function(e) {
-            handleCountySearch(e.target.value);
+            aliceMax?.addEventListener('input', function() {
+                document.getElementById('alice-max-val').textContent = this.value;
+            });
         });
         
         // Initialize on load
