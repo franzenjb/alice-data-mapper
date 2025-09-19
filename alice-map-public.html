@@ -39,12 +39,17 @@
             max-height: 90vh;
             overflow-y: auto;
             z-index: 1000;
+            border-top: 4px solid #ED1B2E;
         }
         
         h2 {
             margin: 0 0 15px 0;
-            color: #333;
+            color: #ED1B2E;
             font-size: 1.3em;
+        }
+        
+        h3, h4 {
+            color: #6D1F2C;
         }
         
         .year-selector {
@@ -54,6 +59,12 @@
         .year-selector label {
             font-weight: bold;
             margin-right: 10px;
+            color: #6D1F2C;
+        }
+        
+        label {
+            color: #6D1F2C;
+            font-weight: 600;
         }
         
         select, input {
@@ -64,18 +75,25 @@
             border-radius: 4px;
         }
         
+        select:focus, input:focus {
+            outline: none;
+            border-color: #ED1B2E;
+            box-shadow: 0 0 0 2px rgba(237, 27, 46, 0.1);
+        }
+        
         .info-box {
-            background: #f5f5f5;
+            background: #FFF5F5;
             padding: 15px;
             border-radius: 5px;
             margin: 15px 0;
+            border-left: 3px solid #ED1B2E;
         }
         
         .stat-row {
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #FFE0E0;
         }
         
         .stat-row:last-child {
@@ -83,12 +101,12 @@
         }
         
         .stat-label {
-            color: #666;
+            color: #6D1F2C;
         }
         
         .stat-value {
             font-weight: bold;
-            color: #333;
+            color: #ED1B2E;
         }
         
         .legend {
@@ -100,12 +118,14 @@
             left: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
+            border-top: 3px solid #ED1B2E;
         }
         
         .legend-title {
             font-weight: bold;
             margin-bottom: 10px;
             font-size: 14px;
+            color: #6D1F2C;
         }
         
         .legend-item {
@@ -113,6 +133,7 @@
             align-items: center;
             margin: 5px 0;
             font-size: 13px;
+            color: #333;
         }
         
         .legend-color {
@@ -133,15 +154,20 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            border-top: 4px solid #ED1B2E;
         }
         
         .loading.hidden {
             display: none;
         }
         
+        .loading h3 {
+            color: #ED1B2E;
+        }
+        
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border: 4px solid #FFE0E0;
+            border-top: 4px solid #ED1B2E;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -156,8 +182,9 @@
         
         .tabs {
             display: flex;
-            border-bottom: 2px solid #ddd;
+            border-bottom: 2px solid #ED1B2E;
             margin-bottom: 15px;
+            gap: 2px;
         }
         
         .tab {
@@ -165,13 +192,20 @@
             padding: 10px;
             text-align: center;
             cursor: pointer;
-            background: #f5f5f5;
+            background: #FFE0E0;
             border: none;
             transition: all 0.3s;
+            color: #6D1F2C;
+            font-weight: 600;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .tab:hover {
+            background: #FFB3B3;
         }
         
         .tab.active {
-            background: #3498db;
+            background: #ED1B2E;
             color: white;
         }
         
@@ -196,7 +230,8 @@
             font-size: 16px;
             margin-bottom: 10px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid #ED1B2E;
+            color: #6D1F2C;
         }
         
         .popup-stat {
@@ -211,10 +246,11 @@
         
         .popup-stat-value {
             font-weight: bold;
+            color: #ED1B2E;
         }
         
         button {
-            background: #3498db;
+            background: #ED1B2E;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -222,10 +258,14 @@
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
         
         button:hover {
-            background: #2980b9;
+            background: #C41E3A;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(237, 27, 46, 0.3);
         }
     </style>
 </head>
@@ -239,10 +279,17 @@
     </div>
     
     <div class="control-panel">
-        <h2>🗺️ ALICE Data Explorer</h2>
-        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">
-            No login required - Public data version
-        </p>
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <div style="width: 40px; height: 40px; background: #ED1B2E; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                <span style="color: white; font-size: 24px; font-weight: bold;">+</span>
+            </div>
+            <div>
+                <h2 style="margin: 0;">ALICE Data Explorer</h2>
+                <p style="font-size: 11px; color: #6D1F2C; margin: 2px 0 0 0;">
+                    American Red Cross • Public Data
+                </p>
+            </div>
+        </div>
         
         <div class="year-selector">
             <label for="yearSelect">Year:</label>
