@@ -771,6 +771,8 @@
             
             // Clear county search when state changes
             document.getElementById('countySearch').value = '';
+            const datalist = document.getElementById('countyList');
+            datalist.innerHTML = '';
             
             if (state) {
                 // Zoom to state
@@ -781,6 +783,37 @@
                 
                 // Update county search placeholder
                 document.getElementById('countySearch').placeholder = `Search counties in ${state}...`;
+                
+                // Populate county dropdown with all counties in the selected state
+                const stateCounties = aliceData.filter(d => 
+                    d.state === state && 
+                    d.year === currentYear && 
+                    d.geoLevel === 'county' &&
+                    d.county
+                );
+                
+                // Remove duplicates
+                const uniqueCounties = [];
+                const seen = new Set();
+                stateCounties.forEach(d => {
+                    if (!seen.has(d.county)) {
+                        seen.add(d.county);
+                        uniqueCounties.push(d);
+                    }
+                });
+                
+                // Sort counties alphabetically
+                uniqueCounties.sort((a, b) => a.county.localeCompare(b.county));
+                
+                // Add all counties to datalist
+                uniqueCounties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county.county;
+                    option.label = county.county;
+                    datalist.appendChild(option);
+                });
+                
+                console.log(`Populated ${uniqueCounties.length} counties for ${state}`);
             } else {
                 // Reset to US view
                 map.setView([39.5, -98.5], 5);
@@ -793,7 +826,7 @@
             const search = searchValue.toLowerCase().trim();
             const selectedState = document.getElementById('stateFilter').value;
             
-            if (search.length > 1) {
+            if (search.length >= 1) {
                 // Find matching counties
                 let matches = aliceData.filter(d => {
                     if (!d.county || d.year !== currentYear || d.geoLevel !== 'county') return false;
@@ -815,15 +848,18 @@
                     }
                 });
                 
-                // Update datalist with suggestions
-                const datalist = document.getElementById('countyList');
-                datalist.innerHTML = '';
-                uniqueMatches.slice(0, 10).forEach(match => {
-                    const option = document.createElement('option');
-                    option.value = match.county;
-                    option.label = selectedState ? match.county : `${match.county}, ${match.state}`;
-                    datalist.appendChild(option);
-                });
+                // Only update datalist if user is actively typing (not just focusing)
+                if (search.length > 0) {
+                    // Update datalist with filtered suggestions
+                    const datalist = document.getElementById('countyList');
+                    datalist.innerHTML = '';
+                    uniqueMatches.slice(0, 20).forEach(match => {
+                        const option = document.createElement('option');
+                        option.value = match.county;
+                        option.label = selectedState ? match.county : `${match.county}, ${match.state}`;
+                        datalist.appendChild(option);
+                    });
+                }
                 
                 // Check for exact match and zoom
                 const exactMatch = uniqueMatches.find(m => 
@@ -848,7 +884,45 @@
                     }
                 }
             }
-        }
+        
+        // County search focus event - show all counties when field is clicked
+        document.getElementById('countySearch').addEventListener('focus', function(e) {
+            const selectedState = document.getElementById('stateFilter').value;
+            
+            if (selectedState && e.target.value === '') {
+                // Show all counties for the selected state
+                const datalist = document.getElementById('countyList');
+                datalist.innerHTML = '';
+                
+                const stateCounties = aliceData.filter(d => 
+                    d.state === selectedState && 
+                    d.year === currentYear && 
+                    d.geoLevel === 'county' &&
+                    d.county
+                );
+                
+                // Remove duplicates
+                const uniqueCounties = [];
+                const seen = new Set();
+                stateCounties.forEach(d => {
+                    if (!seen.has(d.county)) {
+                        seen.add(d.county);
+                        uniqueCounties.push(d);
+                    }
+                });
+                
+                // Sort counties alphabetically
+                uniqueCounties.sort((a, b) => a.county.localeCompare(b.county));
+                
+                // Add all counties to datalist
+                uniqueCounties.forEach(county => {
+                    const option = document.createElement('option');
+                    option.value = county.county;
+                    option.label = county.county;
+                    datalist.appendChild(option);
+                });
+            }
+        });
         
         // County search input event
         document.getElementById('countySearch').addEventListener('input', function(e) {
