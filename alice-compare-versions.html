@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Maps - Version Comparison</title>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        .header {
+            background: #ED1B2E;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+        }
+        
+        .version-info {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .tabs-container {
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            overflow-x: auto;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .tab-button:hover {
+            background: #e8e8e8;
+        }
+        
+        .tab-button.active {
+            background: white;
+            color: #ED1B2E;
+            font-weight: 600;
+        }
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ED1B2E;
+        }
+        
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 100px);
+        }
+        
+        .iframe-tab {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+        
+        .iframe-tab.active {
+            display: block;
+        }
+        
+        .comparison-panel {
+            position: fixed;
+            right: 20px;
+            top: 120px;
+            width: 350px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 20px;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .comparison-panel.show {
+            display: block;
+        }
+        
+        .feature-comparison {
+            margin-bottom: 20px;
+        }
+        
+        .feature-comparison h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .feature-check {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-check.yes {
+            color: #28a745;
+        }
+        
+        .feature-check.no {
+            color: #dc3545;
+        }
+        
+        .feature-check.partial {
+            color: #ffc107;
+        }
+        
+        .toggle-comparison {
+            position: fixed;
+            right: 20px;
+            top: 120px;
+            padding: 10px 15px;
+            background: #ED1B2E;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1001;
+        }
+        
+        .version-description {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        
+        .stats-label {
+            color: #666;
+        }
+        
+        .stats-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-panel {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ ALICE Data Maps - Version Comparison</h1>
+        <div class="version-info">
+            <span id="data-stats">85,846 records • 33 states • 21,127 counties</span>
+        </div>
+    </div>
+    
+    <div class="tabs-container">
+        <button class="tab-button active" onclick="switchTab('original')">
+            Original Enhanced (index.html)
+        </button>
+        <button class="tab-button" onclick="switchTab('simple')">
+            Simple Map
+        </button>
+        <button class="tab-button" onclick="switchTab('all50')">
+            All 50 States
+        </button>
+        <button class="tab-button" onclick="switchTab('demographics')">
+            Demographics Version
+        </button>
+        <button class="tab-button" onclick="switchTab('public')">
+            Public Version
+        </button>
+    </div>
+    
+    <div class="iframe-container">
+        <iframe id="original-frame" class="iframe-tab active" src="index.html"></iframe>
+        <iframe id="simple-frame" class="iframe-tab" src="alice-map-simple.html"></iframe>
+        <iframe id="all50-frame" class="iframe-tab" src="alice-map-all-50-states.html"></iframe>
+        <iframe id="demographics-frame" class="iframe-tab" src="alice-map-demographics.html"></iframe>
+        <iframe id="public-frame" class="iframe-tab" src="alice-map-public.html"></iframe>
+    </div>
+    
+    <button class="toggle-comparison" onclick="toggleComparison()">
+        📊 Compare Features
+    </button>
+    
+    <div class="comparison-panel" id="comparison-panel">
+        <h2 style="margin-bottom: 15px; font-size: 18px;">Feature Comparison</h2>
+        
+        <div class="version-description" id="version-desc">
+            Select a tab to see version details
+        </div>
+        
+        <div class="feature-comparison">
+            <h3>Data Coverage</h3>
+            <div id="coverage-features"></div>
+        </div>
+        
+        <div class="feature-comparison">
+            <h3>User Interface</h3>
+            <div id="ui-features"></div>
+        </div>
+        
+        <div class="feature-comparison">
+            <h3>Filtering & Analysis</h3>
+            <div id="filter-features"></div>
+        </div>
+        
+        <div class="feature-comparison">
+            <h3>Performance</h3>
+            <div id="performance-features"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Version configurations
+        const versions = {
+            'original': {
+                name: 'Original Enhanced',
+                file: 'index.html',
+                description: 'Full-featured version with demographic filters, vulnerability scoring, and analysis tools. Most comprehensive filtering options.',
+                features: {
+                    coverage: {
+                        'All 33 states with data': true,
+                        'County-level detail': true,
+                        'State-level summaries': false,
+                        'All 50 states coverage': false,
+                        'Alabama included': true,
+                        'Wisconsin included': true
+                    },
+                    ui: {
+                        'Sidebar controls': true,
+                        'Tab navigation': true,
+                        'Interactive tooltips': true,
+                        'Mobile responsive': true,
+                        'Legend': true,
+                        'Red Cross branding': true
+                    },
+                    filtering: {
+                        'State filter': true,
+                        'ALICE rate slider': true,
+                        'Demographic filters': true,
+                        'Elderly population filter': true,
+                        'Children filter': true,
+                        'Single parent filter': true,
+                        'Minority filter': true,
+                        'Vulnerability scoring': true
+                    },
+                    performance: {
+                        'Fast loading': false,
+                        'Lightweight': false,
+                        'Complex features': true,
+                        'Export capability': true
+                    }
+                }
+            },
+            'simple': {
+                name: 'Simple Map',
+                file: 'alice-map-simple.html',
+                description: 'Clean, straightforward interface. Best performance, easy to use. Good for basic exploration.',
+                features: {
+                    coverage: {
+                        'All 33 states with data': true,
+                        'County-level detail': true,
+                        'State-level summaries': false,
+                        'All 50 states coverage': false,
+                        'Alabama included': true,
+                        'Wisconsin included': true
+                    },
+                    ui: {
+                        'Sidebar controls': false,
+                        'Tab navigation': false,
+                        'Interactive tooltips': true,
+                        'Mobile responsive': true,
+                        'Legend': true,
+                        'Red Cross branding': true
+                    },
+                    filtering: {
+                        'State filter': true,
+                        'ALICE rate slider': false,
+                        'Demographic filters': false,
+                        'Elderly population filter': false,
+                        'Children filter': false,
+                        'Single parent filter': false,
+                        'Minority filter': false,
+                        'Vulnerability scoring': false
+                    },
+                    performance: {
+                        'Fast loading': true,
+                        'Lightweight': true,
+                        'Complex features': false,
+                        'Export capability': false
+                    }
+                }
+            },
+            'all50': {
+                name: 'All 50 States',
+                file: 'alice-map-all-50-states.html',
+                description: 'Complete U.S. coverage with state-level data for all 50 states. County details where available. Professional sidebar interface.',
+                features: {
+                    coverage: {
+                        'All 33 states with data': true,
+                        'County-level detail': true,
+                        'State-level summaries': true,
+                        'All 50 states coverage': true,
+                        'Alabama included': true,
+                        'Wisconsin included': true
+                    },
+                    ui: {
+                        'Sidebar controls': true,
+                        'Tab navigation': true,
+                        'Interactive tooltips': true,
+                        'Mobile responsive': true,
+                        'Legend': true,
+                        'Red Cross branding': true
+                    },
+                    filtering: {
+                        'State filter': true,
+                        'ALICE rate slider': false,
+                        'Demographic filters': false,
+                        'Elderly population filter': false,
+                        'Children filter': false,
+                        'Single parent filter': false,
+                        'Minority filter': false,
+                        'Vulnerability scoring': false
+                    },
+                    performance: {
+                        'Fast loading': true,
+                        'Lightweight': false,
+                        'Complex features': false,
+                        'Export capability': false
+                    }
+                }
+            },
+            'demographics': {
+                name: 'Demographics Version',
+                file: 'alice-map-demographics.html',
+                description: 'Earlier version with demographic focus. May have older data.',
+                features: {
+                    coverage: {
+                        'All 33 states with data': 'partial',
+                        'County-level detail': true,
+                        'State-level summaries': false,
+                        'All 50 states coverage': false,
+                        'Alabama included': 'partial',
+                        'Wisconsin included': 'partial'
+                    },
+                    ui: {
+                        'Sidebar controls': true,
+                        'Tab navigation': true,
+                        'Interactive tooltips': true,
+                        'Mobile responsive': true,
+                        'Legend': true,
+                        'Red Cross branding': true
+                    },
+                    filtering: {
+                        'State filter': true,
+                        'ALICE rate slider': true,
+                        'Demographic filters': true,
+                        'Elderly population filter': true,
+                        'Children filter': true,
+                        'Single parent filter': true,
+                        'Minority filter': true,
+                        'Vulnerability scoring': true
+                    },
+                    performance: {
+                        'Fast loading': false,
+                        'Lightweight': false,
+                        'Complex features': true,
+                        'Export capability': true
+                    }
+                }
+            },
+            'public': {
+                name: 'Public Version',
+                file: 'alice-map-public.html',
+                description: 'Public-facing version. May have simplified features.',
+                features: {
+                    coverage: {
+                        'All 33 states with data': 'partial',
+                        'County-level detail': true,
+                        'State-level summaries': false,
+                        'All 50 states coverage': false,
+                        'Alabama included': 'partial',
+                        'Wisconsin included': 'partial'
+                    },
+                    ui: {
+                        'Sidebar controls': true,
+                        'Tab navigation': false,
+                        'Interactive tooltips': true,
+                        'Mobile responsive': true,
+                        'Legend': true,
+                        'Red Cross branding': true
+                    },
+                    filtering: {
+                        'State filter': true,
+                        'ALICE rate slider': false,
+                        'Demographic filters': false,
+                        'Elderly population filter': false,
+                        'Children filter': false,
+                        'Single parent filter': false,
+                        'Minority filter': false,
+                        'Vulnerability scoring': false
+                    },
+                    performance: {
+                        'Fast loading': true,
+                        'Lightweight': true,
+                        'Complex features': false,
+                        'Export capability': false
+                    }
+                }
+            }
+        };
+        
+        let currentVersion = 'original';
+        let comparisonVisible = false;
+        
+        function switchTab(versionKey) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show corresponding iframe
+            document.querySelectorAll('.iframe-tab').forEach(iframe => {
+                iframe.classList.remove('active');
+            });
+            document.getElementById(`${versionKey}-frame`).classList.add('active');
+            
+            // Update current version
+            currentVersion = versionKey;
+            
+            // Update comparison panel if visible
+            if (comparisonVisible) {
+                updateComparison();
+            }
+        }
+        
+        function toggleComparison() {
+            comparisonVisible = !comparisonVisible;
+            const panel = document.getElementById('comparison-panel');
+            panel.classList.toggle('show', comparisonVisible);
+            
+            if (comparisonVisible) {
+                updateComparison();
+            }
+        }
+        
+        function updateComparison() {
+            const version = versions[currentVersion];
+            
+            // Update description
+            document.getElementById('version-desc').innerHTML = `
+                <strong>${version.name}:</strong><br>
+                ${version.description}
+            `;
+            
+            // Update feature comparisons
+            updateFeatureSection('coverage-features', version.features.coverage);
+            updateFeatureSection('ui-features', version.features.ui);
+            updateFeatureSection('filter-features', version.features.filtering);
+            updateFeatureSection('performance-features', version.features.performance);
+        }
+        
+        function updateFeatureSection(elementId, features) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            
+            for (const [feature, status] of Object.entries(features)) {
+                const div = document.createElement('div');
+                div.className = 'feature-item';
+                
+                let icon = '';
+                let checkClass = '';
+                
+                if (status === true) {
+                    icon = '✓';
+                    checkClass = 'yes';
+                } else if (status === false) {
+                    icon = '✗';
+                    checkClass = 'no';
+                } else if (status === 'partial') {
+                    icon = '◐';
+                    checkClass = 'partial';
+                }
+                
+                div.innerHTML = `
+                    <span class="feature-check ${checkClass}">${icon}</span>
+                    <span>${feature}</span>
+                `;
+                
+                container.appendChild(div);
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'c' && e.ctrlKey) {
+                e.preventDefault();
+                toggleComparison();
+            }
+            
+            // Number keys to switch tabs
+            if (e.key >= '1' && e.key <= '5') {
+                const index = parseInt(e.key) - 1;
+                const buttons = document.querySelectorAll('.tab-button');
+                if (buttons[index]) {
+                    buttons[index].click();
+                }
+            }
+        });
+        
+        // Initialize
+        updateComparison();
+    </script>
+</body>
+</html>

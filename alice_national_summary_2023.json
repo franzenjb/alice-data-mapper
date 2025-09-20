@@ -1,0 +1,452 @@
+[
+  {
+    "state": "Alabama",
+    "year": 2023,
+    "povertyRate": 16,
+    "aliceRate": 29,
+    "combinedRate": 45,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Alaska",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 25,
+    "combinedRate": 36,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Arizona",
+    "year": 2023,
+    "povertyRate": 13,
+    "aliceRate": 28,
+    "combinedRate": 41,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Arkansas",
+    "year": 2023,
+    "povertyRate": 16,
+    "aliceRate": 31,
+    "combinedRate": 47,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "California",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 30,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Colorado",
+    "year": 2023,
+    "povertyRate": 9,
+    "aliceRate": 27,
+    "combinedRate": 36,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Connecticut",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 28,
+    "combinedRate": 38,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Delaware",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 28,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Florida",
+    "year": 2023,
+    "povertyRate": 13,
+    "aliceRate": 33,
+    "combinedRate": 46,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Georgia",
+    "year": 2023,
+    "povertyRate": 14,
+    "aliceRate": 31,
+    "combinedRate": 45,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Hawaii",
+    "year": 2023,
+    "povertyRate": 9,
+    "aliceRate": 35,
+    "combinedRate": 44,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Idaho",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 29,
+    "combinedRate": 40,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Illinois",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 28,
+    "combinedRate": 40,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Indiana",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 30,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Iowa",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 28,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Kansas",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 29,
+    "combinedRate": 41,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Kentucky",
+    "year": 2023,
+    "povertyRate": 16,
+    "aliceRate": 28,
+    "combinedRate": 44,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Louisiana",
+    "year": 2023,
+    "povertyRate": 19,
+    "aliceRate": 30,
+    "combinedRate": 49,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Maine",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 32,
+    "combinedRate": 43,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Maryland",
+    "year": 2023,
+    "povertyRate": 9,
+    "aliceRate": 29,
+    "combinedRate": 38,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Massachusetts",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 33,
+    "combinedRate": 43,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Michigan",
+    "year": 2023,
+    "povertyRate": 13,
+    "aliceRate": 29,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Minnesota",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 26,
+    "combinedRate": 36,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Mississippi",
+    "year": 2023,
+    "povertyRate": 19,
+    "aliceRate": 31,
+    "combinedRate": 50,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Missouri",
+    "year": 2023,
+    "povertyRate": 13,
+    "aliceRate": 29,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Montana",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 28,
+    "combinedRate": 40,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Nebraska",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 28,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Nevada",
+    "year": 2023,
+    "povertyRate": 13,
+    "aliceRate": 34,
+    "combinedRate": 47,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "New Hampshire",
+    "year": 2023,
+    "povertyRate": 7,
+    "aliceRate": 29,
+    "combinedRate": 36,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "New Jersey",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 31,
+    "combinedRate": 41,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "New Mexico",
+    "year": 2023,
+    "povertyRate": 18,
+    "aliceRate": 27,
+    "combinedRate": 45,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "New York",
+    "year": 2023,
+    "povertyRate": 14,
+    "aliceRate": 31,
+    "combinedRate": 45,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "North Carolina",
+    "year": 2023,
+    "povertyRate": 14,
+    "aliceRate": 30,
+    "combinedRate": 44,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "North Dakota",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 26,
+    "combinedRate": 37,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Ohio",
+    "year": 2023,
+    "povertyRate": 13,
+    "aliceRate": 29,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Oklahoma",
+    "year": 2023,
+    "povertyRate": 15,
+    "aliceRate": 30,
+    "combinedRate": 45,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Oregon",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 30,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Pennsylvania",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 29,
+    "combinedRate": 41,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Rhode Island",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 31,
+    "combinedRate": 42,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "South Carolina",
+    "year": 2023,
+    "povertyRate": 15,
+    "aliceRate": 31,
+    "combinedRate": 46,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "South Dakota",
+    "year": 2023,
+    "povertyRate": 12,
+    "aliceRate": 27,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Tennessee",
+    "year": 2023,
+    "povertyRate": 14,
+    "aliceRate": 30,
+    "combinedRate": 44,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Texas",
+    "year": 2023,
+    "povertyRate": 14,
+    "aliceRate": 31,
+    "combinedRate": 45,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Utah",
+    "year": 2023,
+    "povertyRate": 9,
+    "aliceRate": 24,
+    "combinedRate": 33,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Vermont",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 29,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Virginia",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 29,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Washington",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 28,
+    "combinedRate": 38,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "West Virginia",
+    "year": 2023,
+    "povertyRate": 16,
+    "aliceRate": 28,
+    "combinedRate": 44,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Wisconsin",
+    "year": 2023,
+    "povertyRate": 11,
+    "aliceRate": 28,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  },
+  {
+    "state": "Wyoming",
+    "year": 2023,
+    "povertyRate": 10,
+    "aliceRate": 29,
+    "combinedRate": 39,
+    "dataLevel": "state",
+    "source": "ALICE National Report 2023"
+  }
+]

@@ -523,12 +523,12 @@
         async function loadEnhancedData() {
             try {
                 // Try to load enhanced database first
-                let response = await fetch('alice_master_enhanced.json');
+                let response = await fetch('alice_master_database.json');
                 let enhancedData;
                 
                 if (response.ok) {
                     enhancedData = await response.json();
-                    aliceData = enhancedData.data || [];
+                    aliceData = enhancedData.data || enhancedData;  // Handle both formats
                     console.log(`Loaded ${aliceData.length} enhanced records`);
                 } else {
                     // Fall back to original database

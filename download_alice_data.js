@@ -35,7 +35,8 @@ const states = [
   { name: 'Texas', url: '2025 ALICE - Texas Data Sheet.xlsx' },
   { name: 'Virginia', url: '2025 ALICE - Virginia Data Sheet.xlsx' },
   { name: 'Washington', url: '2025 ALICE - Washington Data Sheet.xlsx' },
-  { name: 'West Virginia', url: '2025 ALICE - West Virginia Data Sheet.xlsx' }
+  { name: 'West Virginia', url: '2025 ALICE - West Virginia Data Sheet.xlsx' },
+  { name: 'Wisconsin', url: '2025 ALICE - Wisconsin Data Sheet.xlsx' }
 ];
 
 async function downloadStateData(state) {

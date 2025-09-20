@@ -1,8 +1,8 @@
 {
-  "totalRecords": 79964,
+  "totalRecords": 85846,
   "byGeoLevel": {
-    "county": 19876,
-    "subcounty": 60088
+    "county": 21127,
+    "subcounty": 64719
   },
   "byState": {
     "alabama": 0,
@@ -36,6 +36,7 @@
     "texas": 0,
     "virginia": 0,
     "washington": 0,
-    "west virginia": 0
+    "west virginia": 0,
+    "wisconsin": 0
   }
 }

@@ -31,22 +31,24 @@ async function buildMasterDatabase() {
       const countyData = XLSX.utils.sheet_to_json(countySheet);
       
       countyData.forEach(row => {
-        if (row['GEO id2']) {
+        // Handle both formats: 'GEO id2' and 'GEO.id2'
+        const geoId = row['GEO id2'] || row['GEO.id2'];
+        if (geoId) {
           const record = {
-            // Geographic identifiers
-            geoID: row['GEO id2'].toString().padStart(5, '0'), // Ensure 5-digit county FIPS
+            // Geographic identifiers - handle both dot and space notation
+            geoID: geoId.toString().padStart(5, '0'), // Ensure 5-digit county FIPS
             geoLevel: 'county',
-            geoDisplayLabel: row['GEO display_label'] || row['County'],
+            geoDisplayLabel: row['GEO display_label'] || row['GEO.display_label'] || row['County'],
             state: row['State'],
-            stateAbbr: row['State Abbr'],
+            stateAbbr: row['State Abbr'] || row['State.Abbr'],
             county: row['County'],
             year: row['Year'],
             
-            // ALICE metrics
+            // ALICE metrics - handle both formats
             totalHouseholds: parseInt(row['Households']) || 0,
-            povertyHouseholds: parseInt(row['Poverty Households']) || 0,
-            aliceHouseholds: parseInt(row['ALICE Households']) || 0,
-            aboveAliceHouseholds: parseInt(row['Above ALICE Households']) || 0,
+            povertyHouseholds: parseInt(row['Poverty Households'] || row['Poverty.Households']) || 0,
+            aliceHouseholds: parseInt(row['ALICE Households'] || row['ALICE.Households']) || 0,
+            aboveAliceHouseholds: parseInt(row['Above ALICE Households'] || row['Above.ALICE.Households']) || 0,
             
             // Calculate percentages
             povertyRate: 0,
@@ -84,8 +86,9 @@ async function buildMasterDatabase() {
       const subcountyData = XLSX.utils.sheet_to_json(subcountySheet);
       
       subcountyData.forEach(row => {
-        if (row['GEO id2']) {
-          const geoID = row['GEO id2'].toString();
+        const geoId = row['GEO id2'] || row['GEO.id2'];
+        if (geoId) {
+          const geoID = geoId.toString();
           let geoLevel = 'subcounty';
           
           // Determine more specific geo level based on Type field
@@ -106,16 +109,16 @@ async function buildMasterDatabase() {
             geoID: geoID,
             geoLevel: geoLevel,
             geoType: row['Type'] || 'subcounty',
-            geoDisplayLabel: row['GEO display_label'],
+            geoDisplayLabel: row['GEO display_label'] || row['GEO.display_label'],
             state: row['State'],
             county: row['County'] || null,
             year: row['Year'],
             
-            // ALICE metrics
+            // ALICE metrics - handle both formats
             totalHouseholds: parseInt(row['Households']) || 0,
-            povertyHouseholds: parseInt(row['Poverty Households']) || 0,
-            aliceHouseholds: parseInt(row['ALICE Households']) || 0,
-            aboveAliceHouseholds: parseInt(row['Above ALICE Households']) || 0,
+            povertyHouseholds: parseInt(row['Poverty Households'] || row['Poverty.Households']) || 0,
+            aliceHouseholds: parseInt(row['ALICE Households'] || row['ALICE.Households']) || 0,
+            aboveAliceHouseholds: parseInt(row['Above ALICE Households'] || row['Above.ALICE.Households']) || 0,
             
             // Calculate percentages
             povertyRate: 0,
