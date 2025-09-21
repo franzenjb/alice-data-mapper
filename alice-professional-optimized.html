@@ -539,9 +539,10 @@
                 </select>
             </div>
             
-            <div class="control-group">
+            <div class="control-group" style="position: relative;">
                 <label class="control-label">Search</label>
                 <input type="text" id="searchInput" placeholder="Type county name..." autocomplete="off" />
+                <div id="searchResults" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.375rem; max-height: 200px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"></div>
             </div>
             
             <div class="control-group" style="margin-left: auto;">
@@ -1322,21 +1323,85 @@
         // Search with debounce
         function handleSearch(e) {
             clearTimeout(searchTimeout);
-            const query = e.target.value.toLowerCase();
+            const query = e.target.value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
             
-            if (query.length < 2) return;
+            if (query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
             
             searchTimeout = setTimeout(() => {
                 const matches = aliceData.filter(d => 
                     d.year === currentYear &&
                     d.geoLevel === 'county' &&
                     d.county.toLowerCase().includes(query)
-                ).slice(0, 5);
+                );
                 
                 if (matches.length > 0) {
-                    selectCounty(matches[0].geoID);
+                    // Sort matches: exact matches first, then by state
+                    matches.sort((a, b) => {
+                        const aExact = a.county.toLowerCase() === query;
+                        const bExact = b.county.toLowerCase() === query;
+                        const aStarts = a.county.toLowerCase().startsWith(query);
+                        const bStarts = b.county.toLowerCase().startsWith(query);
+                        
+                        if (aExact && !bExact) return -1;
+                        if (!aExact && bExact) return 1;
+                        if (aStarts && !bStarts) return -1;
+                        if (!aStarts && bStarts) return 1;
+                        
+                        // Then sort by combined rate (highest need first)
+                        const aRate = parseFloat(a.combinedRate || 0);
+                        const bRate = parseFloat(b.combinedRate || 0);
+                        if (aRate !== bRate) return bRate - aRate;
+                        
+                        // Finally sort by state name
+                        return a.state.localeCompare(b.state);
+                    });
+                    
+                    // Show up to 10 results
+                    const limitedMatches = matches.slice(0, 10);
+                    
+                    resultsDiv.innerHTML = limitedMatches.map(d => `
+                        <div onclick="selectCountyFromSearch('${d.geoID}')" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; hover: background: #f8fafc;">
+                            <div style="font-weight: 600; color: #1e293b;">${d.county}, ${d.state}</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">
+                                Combined: ${parseFloat(d.combinedRate || 0).toFixed(1)}% • 
+                                ${(d.totalHouseholds || 0).toLocaleString()} households
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Add hover effect
+                    resultsDiv.querySelectorAll('div[onclick]').forEach(div => {
+                        div.addEventListener('mouseenter', () => {
+                            div.style.background = '#f8fafc';
+                        });
+                        div.addEventListener('mouseleave', () => {
+                            div.style.background = 'white';
+                        });
+                    });
+                    
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsDiv.innerHTML = '<div style="padding: 12px; color: #64748b; text-align: center;">No counties found</div>';
+                    resultsDiv.style.display = 'block';
                 }
             }, 300);
+        }
+        
+        // Select county from search results
+        function selectCountyFromSearch(geoID) {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.style.display = 'none';
+            
+            const data = dataCache.get(`${geoID}_${currentYear}`);
+            if (data) {
+                document.getElementById('searchInput').value = `${data.county}, ${data.state}`;
+            }
+            
+            selectCounty(geoID);
         }
         
         // Reset all
@@ -1348,6 +1413,7 @@
             document.getElementById('stateSelect').value = '';
             document.getElementById('countySelect').value = '';
             document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').style.display = 'none';
             updateCountyDropdown('');
             updateView();
             map.setView([39.8283, -98.5795], 4);
@@ -1430,6 +1496,21 @@
         });
         
         document.getElementById('searchInput').addEventListener('input', handleSearch);
+        
+        // Hide search results when clicking outside or pressing Escape
+        document.addEventListener('click', (e) => {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('searchInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
         
         // View mode buttons
         document.querySelectorAll('.view-button').forEach(btn => {
