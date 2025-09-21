@@ -244,27 +244,33 @@
         }
         
         .poverty-metric .metric-label {
-            color: #dc2626;
+            color: #64748b;
+            font-weight: 600;
         }
         
         .poverty-metric .metric-value {
-            color: #dc2626;
+            color: #1f2937;
+            font-weight: 700;
         }
         
         .alice-metric .metric-label {
-            color: #f59e0b;
+            color: #64748b;
+            font-weight: 600;
         }
         
         .alice-metric .metric-value {
-            color: #f59e0b;
+            color: #1f2937;
+            font-weight: 700;
         }
         
         .combined-metric .metric-label {
-            color: #3b82f6;
+            color: #64748b;
+            font-weight: 600;
         }
         
         .combined-metric .metric-value {
-            color: #3b82f6;
+            color: #1f2937;
+            font-weight: 700;
         }
         
         .map-controls {
@@ -480,6 +486,7 @@
         .popup-stat-value {
             font-size: 1rem;
             font-weight: 700;
+            color: #1f2937;
         }
     </style>
 </head>
@@ -841,7 +848,7 @@
                     <div class="popup-stats">
                         <div class="popup-stat">
                             <div class="popup-stat-label">Poverty</div>
-                            <div class="popup-stat-value" style="color: #ef4444">
+                            <div class="popup-stat-value">
                                 ${parseFloat(data.povertyRate || 0).toFixed(1)}%
                             </div>
                             <div style="font-size: 0.65rem; color: #64748b;">
@@ -850,7 +857,7 @@
                         </div>
                         <div class="popup-stat">
                             <div class="popup-stat-label">ALICE</div>
-                            <div class="popup-stat-value" style="color: #fbbf24">
+                            <div class="popup-stat-value">
                                 ${parseFloat(data.aliceRate || 0).toFixed(1)}%
                             </div>
                             <div style="font-size: 0.65rem; color: #64748b;">
@@ -859,7 +866,7 @@
                         </div>
                         <div class="popup-stat">
                             <div class="popup-stat-label">Combined</div>
-                            <div class="popup-stat-value" style="color: #3b82f6">
+                            <div class="popup-stat-value">
                                 ${parseFloat(data.combinedRate || 0).toFixed(1)}%
                             </div>
                             <div style="font-size: 0.65rem; color: #64748b;">
@@ -1229,7 +1236,7 @@
                                 <div class="popup-stats">
                                     <div class="popup-stat">
                                         <div class="popup-stat-label">Poverty</div>
-                                        <div class="popup-stat-value" style="color: #ef4444">
+                                        <div class="popup-stat-value">
                                             ${parseFloat(data.povertyRate || 0).toFixed(1)}%
                                         </div>
                                         <div style="font-size: 0.65rem; color: #64748b;">
@@ -1238,7 +1245,7 @@
                                     </div>
                                     <div class="popup-stat">
                                         <div class="popup-stat-label">ALICE</div>
-                                        <div class="popup-stat-value" style="color: #fbbf24">
+                                        <div class="popup-stat-value">
                                             ${parseFloat(data.aliceRate || 0).toFixed(1)}%
                                         </div>
                                         <div style="font-size: 0.65rem; color: #64748b;">
@@ -1247,7 +1254,7 @@
                                     </div>
                                     <div class="popup-stat">
                                         <div class="popup-stat-label">Combined</div>
-                                        <div class="popup-stat-value" style="color: #3b82f6">
+                                        <div class="popup-stat-value">
                                             ${parseFloat(data.combinedRate || 0).toFixed(1)}%
                                         </div>
                                         <div style="font-size: 0.65rem; color: #64748b;">
