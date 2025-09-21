@@ -153,10 +153,16 @@
         .main-content {
             max-width: 1400px;
             margin: 1rem auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 0 1rem;
+        }
+        
+        .map-row {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 1rem;
-            padding: 0 1rem;
         }
         
         .map-section {
@@ -168,8 +174,43 @@
         }
         
         #map {
-            height: 600px;
+            height: 500px;
             width: 100%;
+        }
+        
+        .metrics-bar {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .metrics-bar .metric {
+            text-align: center;
+            flex: 1;
+            padding: 0 1rem;
+            border-right: 1px solid #e5e7eb;
+        }
+        
+        .metrics-bar .metric:last-child {
+            border-right: none;
+        }
+        
+        .metrics-bar .metric-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+        
+        .metrics-bar .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
         }
         
         .map-controls {
@@ -413,68 +454,67 @@
     </div>
     
     <div class="main-content">
-        <div class="map-section">
-            <div id="map"></div>
-            <div class="map-controls">
-                <button class="view-button active" data-view="combined">Combined</button>
-                <button class="view-button" data-view="alice">ALICE Only</button>
-                <button class="view-button" data-view="poverty">Poverty Only</button>
+        <div class="map-row">
+            <div class="map-section">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button class="view-button active" data-view="combined">Combined</button>
+                    <button class="view-button" data-view="alice">ALICE Only</button>
+                    <button class="view-button" data-view="poverty">Poverty Only</button>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="panel" id="trendPanel" style="display: none; overflow: hidden;">
+                    <div class="panel-header">County Trends</div>
+                    <div id="countyName" style="font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 1.1rem;"></div>
+                    <div style="position: relative; height: 200px; width: 100%; overflow: hidden;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-header">Top Counties by Need</div>
+                    <div class="table-container">
+                        <table id="rankingsTable">
+                            <thead>
+                                <tr>
+                                    <th>County</th>
+                                    <th>State</th>
+                                    <th>Combined</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-header">Export Data</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="secondary" onclick="exportCSV()">CSV</button>
+                        <button class="secondary" onclick="exportJSON()">JSON</button>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="sidebar">
-            <div class="panel">
-                <div class="panel-header">Key Metrics</div>
-                <div class="metrics-grid">
-                    <div class="metric">
-                        <div class="metric-label">Counties</div>
-                        <div class="metric-value" id="metricCounties">0</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Avg Combined</div>
-                        <div class="metric-value" id="metricAvg">0%</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Households</div>
-                        <div class="metric-value" id="metricHouseholds">0</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Struggling</div>
-                        <div class="metric-value" id="metricStruggling">0</div>
-                    </div>
-                </div>
+        <div class="metrics-bar">
+            <div class="metric">
+                <div class="metric-label">Counties</div>
+                <div class="metric-value" id="metricCounties">0</div>
             </div>
-            
-            <div class="panel">
-                <div class="panel-header">Top Counties by Need</div>
-                <div class="table-container">
-                    <table id="rankingsTable">
-                        <thead>
-                            <tr>
-                                <th>County</th>
-                                <th>State</th>
-                                <th>Combined</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            <div class="metric">
+                <div class="metric-label">Avg Combined Rate</div>
+                <div class="metric-value" id="metricAvg">0%</div>
             </div>
-            
-            <div class="panel" id="trendPanel" style="display: none; overflow: hidden;">
-                <div class="panel-header">County Trends</div>
-                <div id="countyName" style="font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 1.1rem;"></div>
-                <div style="position: relative; height: 200px; width: 100%; overflow: hidden;">
-                    <canvas id="trendChart"></canvas>
-                </div>
+            <div class="metric">
+                <div class="metric-label">Total Households</div>
+                <div class="metric-value" id="metricHouseholds">0</div>
             </div>
-            
-            <div class="panel">
-                <div class="panel-header">Export Data</div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="secondary" onclick="exportCSV()">CSV</button>
-                    <button class="secondary" onclick="exportJSON()">JSON</button>
-                </div>
+            <div class="metric">
+                <div class="metric-label">Struggling Households</div>
+                <div class="metric-value" id="metricStruggling">0</div>
             </div>
         </div>
     </div>
@@ -707,21 +747,15 @@
         
         // Update key metrics for selected county
         function updateKeyMetricsForCounty(countyData) {
-            document.getElementById('countyCount').textContent = '1';
-            document.getElementById('avgCombined').textContent = 
+            document.getElementById('metricCounties').textContent = '1';
+            document.getElementById('metricAvg').textContent = 
                 parseFloat(countyData.combinedRate || 0).toFixed(1) + '%';
-            document.getElementById('totalHouseholds').textContent = 
+            document.getElementById('metricHouseholds').textContent = 
                 (countyData.totalHouseholds || 0).toLocaleString();
             
             const struggling = (countyData.povertyHouseholds || 0) + (countyData.aliceHouseholds || 0);
-            document.getElementById('strugglingHouseholds').textContent = 
+            document.getElementById('metricStruggling').textContent = 
                 struggling.toLocaleString();
-                
-            // Update the header to show selected county
-            const headerText = document.querySelector('.panel-header');
-            if (headerText && headerText.textContent === 'Key Metrics') {
-                headerText.textContent = `Key Metrics - ${countyData.county}, ${countyData.state}`;
-            }
         }
         
         // Show trend chart for selected county
@@ -882,12 +916,6 @@
                 selectedCountyLayer = null;
             }
             document.getElementById('trendPanel').style.display = 'none';
-            
-            // Reset key metrics header
-            const metricsHeader = document.querySelector('.panel-header');
-            if (metricsHeader && metricsHeader.textContent.includes(' - ')) {
-                metricsHeader.textContent = 'Key Metrics';
-            }
             
             // Filter data
             let filtered = aliceData.filter(d => 
