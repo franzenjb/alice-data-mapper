@@ -442,13 +442,6 @@
             font-size: 1rem;
             font-weight: 700;
         }
-        
-        .popup-stat.active-stat {
-            background: #f0f9ff;
-            padding: 6px;
-            border-radius: 4px;
-            border: 1px solid #93c5fd;
-        }
     </style>
 </head>
 <body>
@@ -768,7 +761,7 @@
                 <div class="popup-content">
                     <div class="popup-title">${data.county}, ${data.state}</div>
                     <div class="popup-stats">
-                        <div class="popup-stat ${currentView === 'poverty' ? 'active-stat' : ''}">
+                        <div class="popup-stat">
                             <div class="popup-stat-label">Poverty</div>
                             <div class="popup-stat-value" style="color: #ef4444">
                                 ${parseFloat(data.povertyRate || 0).toFixed(1)}%
@@ -777,7 +770,7 @@
                                 ${(data.povertyHouseholds || 0).toLocaleString()} HH
                             </div>
                         </div>
-                        <div class="popup-stat ${currentView === 'alice' ? 'active-stat' : ''}">
+                        <div class="popup-stat">
                             <div class="popup-stat-label">ALICE</div>
                             <div class="popup-stat-value" style="color: #fbbf24">
                                 ${parseFloat(data.aliceRate || 0).toFixed(1)}%
@@ -786,7 +779,7 @@
                                 ${(data.aliceHouseholds || 0).toLocaleString()} HH
                             </div>
                         </div>
-                        <div class="popup-stat ${currentView === 'combined' ? 'active-stat' : ''}">
+                        <div class="popup-stat">
                             <div class="popup-stat-label">Combined</div>
                             <div class="popup-stat-value" style="color: #3b82f6">
                                 ${parseFloat(data.combinedRate || 0).toFixed(1)}%
