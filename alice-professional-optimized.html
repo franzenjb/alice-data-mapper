@@ -238,9 +238,21 @@
         }
         
         .metrics-bar .metric-value {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: #1f2937;
+        }
+        
+        .poverty-metric .metric-label {
+            color: #dc2626;
+        }
+        
+        .alice-metric .metric-label {
+            color: #f59e0b;
+        }
+        
+        .combined-metric .metric-label {
+            color: #3b82f6;
         }
         
         .map-controls {
@@ -417,6 +429,13 @@
             font-size: 1rem;
             font-weight: 700;
         }
+        
+        .popup-stat.active-stat {
+            background: #f0f9ff;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #93c5fd;
+        }
     </style>
 </head>
 <body>
@@ -504,16 +523,20 @@
                         <div class="metric-value" id="metricCounties">0</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">Avg Combined Rate</div>
-                        <div class="metric-value" id="metricAvg">0%</div>
-                    </div>
-                    <div class="metric">
                         <div class="metric-label">Total Households</div>
                         <div class="metric-value" id="metricHouseholds">0</div>
                     </div>
-                    <div class="metric">
-                        <div class="metric-label">Struggling Households</div>
-                        <div class="metric-value" id="metricStruggling">0</div>
+                    <div class="metric poverty-metric">
+                        <div class="metric-label">Poverty</div>
+                        <div class="metric-value" id="metricPoverty">0% | 0</div>
+                    </div>
+                    <div class="metric alice-metric">
+                        <div class="metric-label">ALICE</div>
+                        <div class="metric-value" id="metricAlice">0% | 0</div>
+                    </div>
+                    <div class="metric combined-metric">
+                        <div class="metric-label">Combined</div>
+                        <div class="metric-value" id="metricCombined">0% | 0</div>
                     </div>
                 </div>
             </div>
@@ -727,32 +750,41 @@
             });
             selectedCountyLayer = layer;
             
-            // Create popup
+            // Create popup - always show all three values for context
             const popupContent = `
                 <div class="popup-content">
                     <div class="popup-title">${data.county}, ${data.state}</div>
                     <div class="popup-stats">
-                        <div class="popup-stat">
+                        <div class="popup-stat ${currentView === 'poverty' ? 'active-stat' : ''}">
                             <div class="popup-stat-label">Poverty</div>
                             <div class="popup-stat-value" style="color: #ef4444">
                                 ${parseFloat(data.povertyRate || 0).toFixed(1)}%
                             </div>
+                            <div style="font-size: 0.65rem; color: #64748b;">
+                                ${(data.povertyHouseholds || 0).toLocaleString()} HH
+                            </div>
                         </div>
-                        <div class="popup-stat">
+                        <div class="popup-stat ${currentView === 'alice' ? 'active-stat' : ''}">
                             <div class="popup-stat-label">ALICE</div>
                             <div class="popup-stat-value" style="color: #fbbf24">
                                 ${parseFloat(data.aliceRate || 0).toFixed(1)}%
                             </div>
+                            <div style="font-size: 0.65rem; color: #64748b;">
+                                ${(data.aliceHouseholds || 0).toLocaleString()} HH
+                            </div>
                         </div>
-                        <div class="popup-stat">
+                        <div class="popup-stat ${currentView === 'combined' ? 'active-stat' : ''}">
                             <div class="popup-stat-label">Combined</div>
                             <div class="popup-stat-value" style="color: #3b82f6">
                                 ${parseFloat(data.combinedRate || 0).toFixed(1)}%
                             </div>
+                            <div style="font-size: 0.65rem; color: #64748b;">
+                                ${((data.povertyHouseholds || 0) + (data.aliceHouseholds || 0)).toLocaleString()} HH
+                            </div>
                         </div>
                     </div>
-                    <div style="font-size: 0.75rem; color: #64748b;">
-                        ${(data.totalHouseholds || 0).toLocaleString()} households
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+                        Total: ${(data.totalHouseholds || 0).toLocaleString()} households
                     </div>
                 </div>
             `;
@@ -776,14 +808,23 @@
         // Update key metrics for selected county
         function updateKeyMetricsForCounty(countyData) {
             document.getElementById('metricCounties').textContent = '1';
-            document.getElementById('metricAvg').textContent = 
-                parseFloat(countyData.combinedRate || 0).toFixed(1) + '%';
             document.getElementById('metricHouseholds').textContent = 
                 (countyData.totalHouseholds || 0).toLocaleString();
             
-            const struggling = (countyData.povertyHouseholds || 0) + (countyData.aliceHouseholds || 0);
-            document.getElementById('metricStruggling').textContent = 
-                struggling.toLocaleString();
+            const povertyHH = countyData.povertyHouseholds || 0;
+            const aliceHH = countyData.aliceHouseholds || 0;
+            const combinedHH = povertyHH + aliceHH;
+            
+            const povertyRate = parseFloat(countyData.povertyRate || 0).toFixed(1);
+            const aliceRate = parseFloat(countyData.aliceRate || 0).toFixed(1);
+            const combinedRate = parseFloat(countyData.combinedRate || 0).toFixed(1);
+            
+            document.getElementById('metricPoverty').textContent = 
+                `${povertyRate}% | ${povertyHH.toLocaleString()}`;
+            document.getElementById('metricAlice').textContent = 
+                `${aliceRate}% | ${aliceHH.toLocaleString()}`;
+            document.getElementById('metricCombined').textContent = 
+                `${combinedRate}% | ${combinedHH.toLocaleString()}`;
         }
         
         // Show trend chart for selected county
@@ -976,17 +1017,31 @@
         function updateMetrics(data) {
             const count = data.length;
             const totalHH = data.reduce((sum, d) => sum + (d.totalHouseholds || 0), 0);
+            
+            // Calculate totals and averages for each category
+            const totalPovertyHH = data.reduce((sum, d) => sum + (d.povertyHouseholds || 0), 0);
+            const totalAliceHH = data.reduce((sum, d) => sum + (d.aliceHouseholds || 0), 0);
+            const totalCombinedHH = totalPovertyHH + totalAliceHH;
+            
+            const avgPoverty = count > 0 ? 
+                data.reduce((sum, d) => sum + parseFloat(d.povertyRate || 0), 0) / count : 0;
+            const avgAlice = count > 0 ? 
+                data.reduce((sum, d) => sum + parseFloat(d.aliceRate || 0), 0) / count : 0;
             const avgCombined = count > 0 ? 
                 data.reduce((sum, d) => sum + parseFloat(d.combinedRate || 0), 0) / count : 0;
-            const struggling = data.reduce((sum, d) => 
-                sum + (d.totalHouseholds || 0) * parseFloat(d.combinedRate || 0) / 100, 0);
+            
+            // Format household numbers
+            const formatHH = (num) => num > 1000000 ? (num / 1000000).toFixed(1) + 'M' : Math.round(num).toLocaleString();
             
             document.getElementById('metricCounties').textContent = count.toLocaleString();
-            document.getElementById('metricAvg').textContent = avgCombined.toFixed(1) + '%';
-            document.getElementById('metricHouseholds').textContent = 
-                totalHH > 1000000 ? (totalHH / 1000000).toFixed(1) + 'M' : totalHH.toLocaleString();
-            document.getElementById('metricStruggling').textContent = 
-                struggling > 1000000 ? (struggling / 1000000).toFixed(1) + 'M' : Math.round(struggling).toLocaleString();
+            document.getElementById('metricHouseholds').textContent = formatHH(totalHH);
+            
+            document.getElementById('metricPoverty').textContent = 
+                `${avgPoverty.toFixed(1)}% | ${formatHH(totalPovertyHH)}`;
+            document.getElementById('metricAlice').textContent = 
+                `${avgAlice.toFixed(1)}% | ${formatHH(totalAliceHH)}`;
+            document.getElementById('metricCombined').textContent = 
+                `${avgCombined.toFixed(1)}% | ${formatHH(totalCombinedHH)}`;
         }
         
         // Update table
