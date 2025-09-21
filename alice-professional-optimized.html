@@ -174,33 +174,41 @@
         
         .map-controls {
             position: absolute;
-            bottom: 1rem;
-            left: 1rem;
+            top: 1rem;
+            right: 1rem;
             display: flex;
             gap: 0.5rem;
             z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
         
         .view-button {
-            padding: 0.5rem;
+            padding: 0.75rem 1.25rem;
             background: white;
             color: #475569;
-            border: 1px solid #e2e8f0;
+            border: 2px solid #e2e8f0;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.75rem;
-            font-weight: 500;
+            font-size: 0.95rem;
+            font-weight: 600;
+            min-width: 100px;
         }
         
         .view-button:hover {
-            background: #f8fafc;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
         }
         
         .view-button.active {
-            background: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
         }
         
         .sidebar {
