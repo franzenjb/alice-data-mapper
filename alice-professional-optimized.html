@@ -247,11 +247,23 @@
             color: #dc2626;
         }
         
+        .poverty-metric .metric-value {
+            color: #dc2626;
+        }
+        
         .alice-metric .metric-label {
             color: #f59e0b;
         }
         
+        .alice-metric .metric-value {
+            color: #f59e0b;
+        }
+        
         .combined-metric .metric-label {
+            color: #3b82f6;
+        }
+        
+        .combined-metric .metric-value {
             color: #3b82f6;
         }
         
@@ -418,6 +430,7 @@
         
         .popup-stat {
             text-align: center;
+            padding: 0 4px;
         }
         
         .popup-stat-label {
@@ -551,7 +564,7 @@
                 </div>
                 
                 <div class="panel">
-                    <div class="panel-header">Top Counties by Need</div>
+                    <div class="panel-header" id="topCountiesHeader">Top Counties by Need</div>
                     <div class="table-container">
                         <table id="rankingsTable">
                             <thead>
@@ -784,7 +797,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.75rem; color: #64748b; margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
-                        Total: ${(data.totalHouseholds || 0).toLocaleString()} households
+                        Total: <strong style="color: #1f2937;">${(data.totalHouseholds || 0).toLocaleString()} households</strong>
                     </div>
                 </div>
             `;
@@ -996,6 +1009,12 @@
             
             // Update metrics
             updateMetrics(filtered);
+            
+            // Update table header based on state filter
+            const headerText = currentState ? 
+                `Top Counties by Need - ${currentState}` : 
+                'Top Counties by Need';
+            document.getElementById('topCountiesHeader').textContent = headerText;
             
             // Update table - sort by combined rate and show top 20
             const sortedFiltered = [...filtered].sort((a, b) => 
