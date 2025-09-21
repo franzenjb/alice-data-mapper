@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALICE Data Mapper - Interactive Dashboard for Financial Hardship Data</title>
+    <meta name="description" content="Explore ALICE (Asset Limited, Income Constrained, Employed) data across US counties with interactive maps and visualizations">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .hero {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            color: #4a5568;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .stat {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .feature p {
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .versions {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .versions h2 {
+            color: #2d3748;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+        
+        .version-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .version-card {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .version-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .version-card h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .version-card p {
+            color: #718096;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .version-card a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .version-card a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .subtitle {
+                font-size: 1.1em;
+            }
+            
+            .hero {
+                padding: 40px 20px;
+            }
+            
+            .btn {
+                padding: 14px 30px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>ALICE Data Mapper</h1>
+            <p class="subtitle">
+                Interactive visualization of ALICE (Asset Limited, Income Constrained, Employed) households across the United States. 
+                Explore financial hardship data at county and state levels from 2010-2023.
+            </p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">3,221</div>
+                    <div class="stat-label">US Counties</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">Years of Data</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">85K+</div>
+                    <div class="stat-label">Data Points</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">51%</div>
+                    <div class="stat-label">Households Struggling</div>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="alice-professional-optimized.html" class="btn btn-primary">
+                    <span>🚀</span> Launch Dashboard
+                </a>
+                <a href="alice-showcase.html" class="btn btn-secondary">
+                    <span>🎨</span> View All Versions
+                </a>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🗺️</div>
+                <h3>Interactive Maps</h3>
+                <p>Explore county-level ALICE data with interactive choropleth maps. Click any county for detailed statistics.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Rich Visualizations</h3>
+                <p>View trends over time with dynamic charts. Compare poverty, ALICE, and above-ALICE household distributions.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <h3>Advanced Filtering</h3>
+                <p>Search and filter by state, county, year, and household status. Export filtered data for further analysis.</p>
+            </div>
+        </div>
+        
+        <div class="versions">
+            <h2>Available Versions</h2>
+            <div class="version-grid">
+                <div class="version-card">
+                    <h4>Professional Optimized</h4>
+                    <p>Latest high-performance version with all features</p>
+                    <a href="alice-professional-optimized.html">Open →</a>
+                </div>
+                <div class="version-card">
+                    <h4>Professional</h4>
+                    <p>Full-featured dashboard with advanced filtering</p>
+                    <a href="alice-professional.html">Open →</a>
+                </div>
+                <div class="version-card">
+                    <h4>Showcase Gallery</h4>
+                    <p>Compare all versions side-by-side</p>
+                    <a href="alice-showcase.html">Open →</a>
+                </div>
+                <div class="version-card">
+                    <h4>Basic Dashboard</h4>
+                    <p>Simple, lightweight version</p>
+                    <a href="alice-dashboard.html">Open →</a>
+                </div>
+                <div class="version-card">
+                    <h4>Enhanced</h4>
+                    <p>Extended features and visualizations</p>
+                    <a href="alice-dashboard-enhanced.html">Open →</a>
+                </div>
+                <div class="version-card">
+                    <h4>ArcGIS Data</h4>
+                    <p>GeoJSON files for ArcGIS integration</p>
+                    <a href="https://github.com/franzenjb/alice-data-mapper/tree/main">View Files →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

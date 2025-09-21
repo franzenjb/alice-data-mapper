@@ -558,14 +558,20 @@
                 
                 // Hide loading screen
                 setTimeout(() => {
-                    document.getElementById('loadingScreen').classList.add('hidden');
+                    const loadingScreen = document.getElementById('loadingScreen');
+                    if (loadingScreen) {
+                        loadingScreen.style.display = 'none';
+                    }
                     isLoading = false;
                 }, 500);
                 
             } catch (error) {
                 console.error('Error loading county boundaries:', error);
                 document.getElementById('loadingText').textContent = 'Map data unavailable. Data tables still work.';
-                document.getElementById('loadingScreen').classList.add('hidden');
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
                 isLoading = false;
             }
         }
@@ -587,11 +593,11 @@
             
             let value;
             if (currentView === 'alice') {
-                value = parseFloat(data.aliceHouseholdPercent || 0);
+                value = parseFloat(data.aliceRate || 0);
             } else if (currentView === 'poverty') {
-                value = parseFloat(data.povertyHouseholdPercent || 0);
+                value = parseFloat(data.povertyRate || 0);
             } else {
-                value = parseFloat(data.combinedPercent || 0);
+                value = parseFloat(data.combinedRate || 0);
             }
             
             const color = value > 50 ? '#dc2626' :
@@ -625,19 +631,19 @@
                         <div class="popup-stat">
                             <div class="popup-stat-label">Poverty</div>
                             <div class="popup-stat-value" style="color: #ef4444">
-                                ${parseFloat(data.povertyHouseholdPercent || 0).toFixed(1)}%
+                                ${parseFloat(data.povertyRate || 0).toFixed(1)}%
                             </div>
                         </div>
                         <div class="popup-stat">
                             <div class="popup-stat-label">ALICE</div>
                             <div class="popup-stat-value" style="color: #fbbf24">
-                                ${parseFloat(data.aliceHouseholdPercent || 0).toFixed(1)}%
+                                ${parseFloat(data.aliceRate || 0).toFixed(1)}%
                             </div>
                         </div>
                         <div class="popup-stat">
                             <div class="popup-stat-label">Combined</div>
                             <div class="popup-stat-value" style="color: #3b82f6">
-                                ${parseFloat(data.combinedPercent || 0).toFixed(1)}%
+                                ${parseFloat(data.combinedRate || 0).toFixed(1)}%
                             </div>
                         </div>
                     </div>
@@ -681,11 +687,24 @@
             }
             
             countySelect.disabled = false;
-            const counties = [...new Set(
-                aliceData
-                    .filter(d => d.state === state && d.year === currentYear)
-                    .map(d => ({ name: d.county, id: d.geoID }))
-            )].sort((a, b) => a.name.localeCompare(b.name));
+            // Get unique counties by geoID, showing only the most recent year's data for labels
+            const countyMap = new Map();
+            
+            aliceData
+                .filter(d => d.state === state && d.geoLevel === 'county')
+                .sort((a, b) => b.year - a.year) // Sort by year descending to get most recent first
+                .forEach(d => {
+                    if (!countyMap.has(d.geoID)) {
+                        countyMap.set(d.geoID, { 
+                            name: d.county, 
+                            id: d.geoID,
+                            year: d.year 
+                        });
+                    }
+                });
+            
+            const counties = Array.from(countyMap.values())
+                .sort((a, b) => a.name.localeCompare(b.name));
             
             countySelect.innerHTML = '<option value="">All Counties</option>' +
                 counties.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -704,8 +723,11 @@
             // Update metrics
             updateMetrics(filtered);
             
-            // Update table (limit to top 20 for performance)
-            updateTable(filtered.slice(0, 20));
+            // Update table - sort by combined rate and show top 20
+            const sortedFiltered = [...filtered].sort((a, b) => 
+                parseFloat(b.combinedRate || 0) - parseFloat(a.combinedRate || 0)
+            );
+            updateTable(sortedFiltered.slice(0, 20));
             
             // Update map if loaded
             if (countyLayer && !initial) {
@@ -722,9 +744,9 @@
             const count = data.length;
             const totalHH = data.reduce((sum, d) => sum + (d.totalHouseholds || 0), 0);
             const avgCombined = count > 0 ? 
-                data.reduce((sum, d) => sum + parseFloat(d.combinedPercent || 0), 0) / count : 0;
+                data.reduce((sum, d) => sum + parseFloat(d.combinedRate || 0), 0) / count : 0;
             const struggling = data.reduce((sum, d) => 
-                sum + (d.totalHouseholds || 0) * parseFloat(d.combinedPercent || 0) / 100, 0);
+                sum + (d.totalHouseholds || 0) * parseFloat(d.combinedRate || 0) / 100, 0);
             
             document.getElementById('metricCounties').textContent = count.toLocaleString();
             document.getElementById('metricAvg').textContent = avgCombined.toFixed(1) + '%';
@@ -737,7 +759,7 @@
         // Update table
         function updateTable(data) {
             const sorted = [...data].sort((a, b) => 
-                parseFloat(b.combinedPercent || 0) - parseFloat(a.combinedPercent || 0)
+                parseFloat(b.combinedRate || 0) - parseFloat(a.combinedRate || 0)
             );
             
             const tbody = document.querySelector('#rankingsTable tbody');
@@ -745,7 +767,7 @@
                 <tr onclick="selectCounty('${d.geoID}')" style="cursor: pointer;">
                     <td>${d.county}</td>
                     <td>${d.state}</td>
-                    <td><strong>${parseFloat(d.combinedPercent || 0).toFixed(1)}%</strong></td>
+                    <td><strong>${parseFloat(d.combinedRate || 0).toFixed(1)}%</strong></td>
                 </tr>
             `).join('');
         }
@@ -820,7 +842,7 @@
             
             const csv = 'County,State,Year,ALICE %,Poverty %,Combined %,Households\n' +
                 filtered.map(d => 
-                    `"${d.county}","${d.state}",${d.year},${d.aliceHouseholdPercent},${d.povertyHouseholdPercent},${d.combinedPercent},${d.totalHouseholds}`
+                    `"${d.county}","${d.state}",${d.year},${d.aliceRate},${d.povertyRate},${d.combinedRate},${d.totalHouseholds}`
                 ).join('\n');
             
             downloadFile(csv, 'alice-data.csv', 'text/csv');
