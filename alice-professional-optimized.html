@@ -878,6 +878,9 @@
             document.getElementById('stateSelect').value = data.state;
             updateCountyDropdown(data.state);
             
+            // Update current state to filter top counties
+            currentState = data.state;
+            
             // Zoom to county
             map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 10 });
             
@@ -886,6 +889,23 @@
             
             // Update key metrics for selected county
             updateKeyMetricsForCounty(data);
+            
+            // Update the top counties table to show only this state
+            const stateFiltered = aliceData.filter(d => 
+                d.year === currentYear && 
+                d.geoLevel === 'county' &&
+                d.state === data.state
+            );
+            
+            // Update table header to show the state
+            document.getElementById('topCountiesHeader').textContent = 
+                `Top Counties by Need - ${data.state}`;
+            
+            // Sort and update table
+            const sorted = [...stateFiltered].sort((a, b) => 
+                parseFloat(b.combinedRate || 0) - parseFloat(a.combinedRate || 0)
+            );
+            updateTable(sorted.slice(0, 20));
         }
         
         // Update key metrics for selected county
