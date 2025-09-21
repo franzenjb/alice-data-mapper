@@ -72,6 +72,30 @@
             align-items: center;
         }
         
+        .export-section {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+            padding-right: 1rem;
+        }
+        
+        .export-btn-header {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .export-btn-header:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
         .logo {
             display: flex;
             align-items: center;
@@ -165,6 +189,12 @@
             gap: 1rem;
         }
         
+        .map-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
         .map-section {
             background: white;
             border-radius: 0.5rem;
@@ -174,14 +204,14 @@
         }
         
         #map {
-            height: 500px;
+            height: 450px;
             width: 100%;
         }
         
         .metrics-bar {
             background: white;
             border-radius: 0.5rem;
-            padding: 1rem 2rem;
+            padding: 0.75rem 1.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-around;
@@ -200,15 +230,15 @@
         }
         
         .metrics-bar .metric-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
         
         .metrics-bar .metric-value {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: bold;
             color: #1f2937;
         }
@@ -411,6 +441,10 @@
                     <div class="stat-value">Updated: 9/20/2025</div>
                 </div>
             </div>
+            <div class="export-section">
+                <button class="export-btn-header" onclick="exportCSV()">CSV</button>
+                <button class="export-btn-header" onclick="exportJSON()">JSON</button>
+            </div>
         </div>
     </div>
     
@@ -455,12 +489,32 @@
     
     <div class="main-content">
         <div class="map-row">
-            <div class="map-section">
-                <div id="map"></div>
-                <div class="map-controls">
-                    <button class="view-button active" data-view="combined">Combined</button>
-                    <button class="view-button" data-view="alice">ALICE Only</button>
-                    <button class="view-button" data-view="poverty">Poverty Only</button>
+            <div class="map-column">
+                <div class="map-section">
+                    <div id="map"></div>
+                    <div class="map-controls">
+                        <button class="view-button active" data-view="combined">Combined</button>
+                        <button class="view-button" data-view="alice">ALICE Only</button>
+                        <button class="view-button" data-view="poverty">Poverty Only</button>
+                    </div>
+                </div>
+                <div class="metrics-bar">
+                    <div class="metric">
+                        <div class="metric-label">Counties</div>
+                        <div class="metric-value" id="metricCounties">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Avg Combined Rate</div>
+                        <div class="metric-value" id="metricAvg">0%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Total Households</div>
+                        <div class="metric-value" id="metricHouseholds">0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Struggling Households</div>
+                        <div class="metric-value" id="metricStruggling">0</div>
+                    </div>
                 </div>
             </div>
             
@@ -489,32 +543,6 @@
                     </div>
                 </div>
                 
-                <div class="panel">
-                    <div class="panel-header">Export Data</div>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="secondary" onclick="exportCSV()">CSV</button>
-                        <button class="secondary" onclick="exportJSON()">JSON</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="metrics-bar">
-            <div class="metric">
-                <div class="metric-label">Counties</div>
-                <div class="metric-value" id="metricCounties">0</div>
-            </div>
-            <div class="metric">
-                <div class="metric-label">Avg Combined Rate</div>
-                <div class="metric-value" id="metricAvg">0%</div>
-            </div>
-            <div class="metric">
-                <div class="metric-label">Total Households</div>
-                <div class="metric-value" id="metricHouseholds">0</div>
-            </div>
-            <div class="metric">
-                <div class="metric-label">Struggling Households</div>
-                <div class="metric-value" id="metricStruggling">0</div>
             </div>
         </div>
     </div>
