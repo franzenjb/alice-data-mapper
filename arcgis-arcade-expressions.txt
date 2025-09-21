@@ -1,0 +1,241 @@
+====================================
+ARCADE EXPRESSIONS FOR ARCGIS POPUP
+====================================
+
+These expressions need to be added to your ArcGIS map's popup configuration.
+Go to your popup settings and add these as Arcade expressions:
+
+------------------------------------
+Expression 0: Format Poverty Households
+------------------------------------
+Name: expr0
+Expression:
+Text(Round($feature.POVERTY_HH), '#,###')
+
+------------------------------------
+Expression 1: Format ALICE Households
+------------------------------------
+Name: expr1
+Expression:
+Text(Round($feature.ALICE_HH), '#,###')
+
+------------------------------------
+Expression 2: Format Above ALICE Households
+------------------------------------
+Name: expr2
+Expression:
+Text(Round($feature.ABOVE_HH), '#,###')
+
+------------------------------------
+Expression 3: Calculate Above ALICE Percentage
+------------------------------------
+Name: expr3
+Expression:
+Round(($feature.ABOVE_HH / $feature.TOTAL_HH) * 100, 1)
+
+------------------------------------
+Expression 4: Format Total Households
+------------------------------------
+Name: expr4
+Expression:
+Text(Round($feature.TOTAL_HH), '#,###')
+
+------------------------------------
+Expression 5: Format Struggling Households
+------------------------------------
+Name: expr5
+Expression:
+Text(Round($feature.STRUGGLING_HH), '#,###')
+
+====================================
+SIMPLIFIED VERSION (No Expressions)
+====================================
+
+If you prefer not to use Arcade expressions, here's a simplified version
+that uses only the direct field values:
+
+------------------------------------
+SIMPLIFIED HTML POPUP
+------------------------------------
+
+<style>
+    .alice-popup {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .alice-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        margin: -10px -10px 0 -10px;
+        border-radius: 6px 6px 0 0;
+    }
+    
+    .county-name {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin: 0 0 3px 0;
+    }
+    
+    .state-info {
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+    
+    .main-stat {
+        background: #f7fafc;
+        padding: 15px;
+        margin: 12px 0;
+        border-radius: 6px;
+        text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    
+    .big-number {
+        font-size: 2em;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.85em;
+        color: #718096;
+        margin-top: 5px;
+    }
+    
+    .stats-row {
+        display: flex;
+        justify-content: space-around;
+        margin: 15px 0;
+        padding: 10px;
+        background: white;
+    }
+    
+    .stat-item {
+        text-align: center;
+        flex: 1;
+    }
+    
+    .stat-value {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+    
+    .poverty { color: #e53e3e; }
+    .alice { color: #ed8936; }
+    .above { color: #38a169; }
+    
+    .stat-name {
+        font-size: 0.75em;
+        color: #718096;
+        margin-top: 3px;
+        text-transform: uppercase;
+    }
+    
+    .info-grid {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-size: 0.85em;
+        color: #4a5568;
+    }
+    
+    .info-value {
+        font-size: 0.9em;
+        font-weight: 600;
+        color: #2d3748;
+    }
+</style>
+
+<div class="alice-popup">
+    <div class="alice-header">
+        <div class="county-name">{NAME}</div>
+        <div class="state-info">{STATE} • {YEAR}</div>
+    </div>
+    
+    <div class="main-stat">
+        <div class="big-number">{STRUGGLING_PCT}%</div>
+        <div class="stat-label">of households are struggling<br/>(Below ALICE Threshold)</div>
+    </div>
+    
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-value poverty">{POVERTY_RT}%</div>
+            <div class="stat-name">Poverty</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value alice">{ALICE_RT}%</div>
+            <div class="stat-name">ALICE</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value above">{COMBINED_RT}%</div>
+            <div class="stat-name">Combined</div>
+        </div>
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-row">
+            <span class="info-label">Total Households:</span>
+            <span class="info-value">{TOTAL_HH}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">ALICE Households:</span>
+            <span class="info-value">{ALICE_HH}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Poverty Households:</span>
+            <span class="info-value">{POVERTY_HH}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Geographic ID:</span>
+            <span class="info-value">{GEOID}</span>
+        </div>
+    </div>
+</div>
+
+====================================
+HOW TO USE IN ARCGIS
+====================================
+
+1. Open your map in ArcGIS Online or ArcGIS Pro
+2. Click on the layer (Alice Counties 2023)
+3. Go to "More Options" → "Configure Pop-up"
+4. Click "Configure" or "Manage Expressions"
+5. Choose "Custom" display
+6. Click the "Configure HTML" button
+7. Copy and paste the HTML code above
+8. If using expressions, add them first in the Arcade editor
+9. Click OK/Save
+10. Test by clicking on any county
+
+====================================
+TIPS FOR CUSTOMIZATION
+====================================
+
+• Change colors: Modify the hex color codes in the CSS
+  - Primary gradient: #667eea and #764ba2
+  - Poverty: #e53e3e (red)
+  - ALICE: #ed8936 (orange)
+  - Above: #38a169 (green)
+
+• Adjust sizes: Modify font-size values in em units
+• Add more fields: Use {FIELD_NAME} syntax
+• Remove sections: Delete unwanted div blocks
+• Add charts: Use ArcGIS built-in chart options below the HTML

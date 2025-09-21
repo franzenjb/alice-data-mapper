@@ -1,0 +1,208 @@
+<!-- 
+ArcGIS HTML Popup Template for ALICE Counties Data
+Copy this code into your ArcGIS Map popup configuration
+-->
+
+<style>
+    .alice-popup {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding: 0;
+        margin: 0;
+        max-width: 350px;
+    }
+    
+    .alice-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        margin: -10px -10px 0 -10px;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .county-name {
+        font-size: 1.4em;
+        font-weight: bold;
+        margin: 0 0 5px 0;
+    }
+    
+    .state-year {
+        font-size: 0.95em;
+        opacity: 0.95;
+    }
+    
+    .key-metrics {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+    }
+    
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .metric-row:last-child {
+        border-bottom: none;
+    }
+    
+    .metric-label {
+        font-size: 0.9em;
+        color: #4a5568;
+        font-weight: 600;
+    }
+    
+    .metric-value {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #2d3748;
+    }
+    
+    .highlight-box {
+        background: white;
+        border: 2px solid #667eea;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .highlight-value {
+        font-size: 2.2em;
+        font-weight: bold;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 5px 0;
+    }
+    
+    .highlight-label {
+        font-size: 0.85em;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .households-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 15px 0;
+    }
+    
+    .household-card {
+        background: white;
+        padding: 12px;
+        border-radius: 6px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    
+    .household-card.poverty {
+        border-top: 3px solid #e53e3e;
+    }
+    
+    .household-card.alice {
+        border-top: 3px solid #f6ad55;
+    }
+    
+    .household-card.above {
+        border-top: 3px solid #48bb78;
+    }
+    
+    .household-count {
+        font-size: 1.1em;
+        font-weight: bold;
+        color: #2d3748;
+    }
+    
+    .household-percent {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin: 4px 0;
+    }
+    
+    .poverty .household-percent {
+        color: #e53e3e;
+    }
+    
+    .alice .household-percent {
+        color: #ed8936;
+    }
+    
+    .above .household-percent {
+        color: #38a169;
+    }
+    
+    .household-label {
+        font-size: 0.75em;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-top: 4px;
+    }
+    
+    .data-footer {
+        font-size: 0.75em;
+        color: #a0aec0;
+        text-align: center;
+        padding: 10px 0 5px 0;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 15px;
+    }
+</style>
+
+<div class="alice-popup">
+    <div class="alice-header">
+        <div class="county-name">{NAME}</div>
+        <div class="state-year">{STATE} • {YEAR}</div>
+    </div>
+    
+    <div class="highlight-box">
+        <div class="highlight-value">{STRUGGLING_PCT}%</div>
+        <div class="highlight-label">Households Below ALICE Threshold</div>
+    </div>
+    
+    <div class="households-grid">
+        <div class="household-card poverty">
+            <div class="household-count">{expression/expr0}</div>
+            <div class="household-percent">{POVERTY_RT}%</div>
+            <div class="household-label">Poverty</div>
+        </div>
+        
+        <div class="household-card alice">
+            <div class="household-count">{expression/expr1}</div>
+            <div class="household-percent">{ALICE_RT}%</div>
+            <div class="household-label">ALICE</div>
+        </div>
+        
+        <div class="household-card above">
+            <div class="household-count">{expression/expr2}</div>
+            <div class="household-percent">{expression/expr3}%</div>
+            <div class="household-label">Above ALICE</div>
+        </div>
+    </div>
+    
+    <div class="key-metrics">
+        <div class="metric-row">
+            <span class="metric-label">Total Households</span>
+            <span class="metric-value">{expression/expr4}</span>
+        </div>
+        <div class="metric-row">
+            <span class="metric-label">Struggling Households</span>
+            <span class="metric-value">{expression/expr5}</span>
+        </div>
+        <div class="metric-row">
+            <span class="metric-label">County FIPS</span>
+            <span class="metric-value">{GEOID}</span>
+        </div>
+    </div>
+    
+    <div class="data-footer">
+        Data Source: United for ALICE • Updated: {UPDATED}
+    </div>
+</div>

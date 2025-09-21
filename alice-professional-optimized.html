@@ -468,6 +468,12 @@
                     <button class="secondary" onclick="exportJSON()">JSON</button>
                 </div>
             </div>
+            
+            <div class="panel" id="trendPanel" style="display: none;">
+                <div class="panel-header">County Trends</div>
+                <div id="countyName" style="font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 1.1rem;"></div>
+                <canvas id="trendChart" width="100%" height="200"></canvas>
+            </div>
         </div>
     </div>
     
@@ -484,6 +490,8 @@
         let dataCache = new Map();
         let searchTimeout;
         let isLoading = true;
+        let selectedCountyLayer = null;
+        let trendChart = null;
         
         // Performance: Cache data in localStorage
         const CACHE_KEY = 'alice_data_cache';
@@ -631,6 +639,24 @@
             
             if (!data) return;
             
+            // Remove previous highlight
+            if (selectedCountyLayer) {
+                selectedCountyLayer.setStyle({
+                    weight: 0.5,
+                    color: 'white',
+                    dashArray: ''
+                });
+            }
+            
+            // Add yellow highlight to selected county
+            layer.setStyle({
+                weight: 3,
+                color: '#FFD700',
+                dashArray: '',
+                fillOpacity: 0.8
+            });
+            selectedCountyLayer = layer;
+            
             // Create popup
             const popupContent = `
                 <div class="popup-content">
@@ -669,6 +695,104 @@
             
             // Zoom to county
             map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 10 });
+            
+            // Show trend chart
+            showTrendChart(fips, data.county, data.state);
+        }
+        
+        // Show trend chart for selected county
+        function showTrendChart(fips, countyName, stateName) {
+            // Get all years of data for this county
+            const years = [2010, 2012, 2014, 2016, 2018, 2019, 2021, 2022, 2023];
+            const povertyData = [];
+            const aliceData = [];
+            const combinedData = [];
+            
+            years.forEach(year => {
+                const data = dataCache.get(`${fips}_${year}`);
+                if (data) {
+                    povertyData.push(parseFloat(data.povertyRate || 0));
+                    aliceData.push(parseFloat(data.aliceRate || 0));
+                    combinedData.push(parseFloat(data.combinedRate || 0));
+                } else {
+                    povertyData.push(null);
+                    aliceData.push(null);
+                    combinedData.push(null);
+                }
+            });
+            
+            // Show the trend panel
+            document.getElementById('trendPanel').style.display = 'block';
+            document.getElementById('countyName').textContent = `${countyName}, ${stateName}`;
+            
+            // Destroy previous chart if exists
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            // Create new chart
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Combined',
+                            data: combinedData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'ALICE',
+                            data: aliceData,
+                            borderColor: '#fbbf24',
+                            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Poverty',
+                            data: povertyData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Populate dropdowns
@@ -720,6 +844,17 @@
         
         // Update view with limited data for performance
         function updateView(initial = false) {
+            // Clear selection when updating view
+            if (selectedCountyLayer) {
+                selectedCountyLayer.setStyle({
+                    weight: 0.5,
+                    color: 'white',
+                    dashArray: ''
+                });
+                selectedCountyLayer = null;
+            }
+            document.getElementById('trendPanel').style.display = 'none';
+            
             // Filter data
             let filtered = aliceData.filter(d => 
                 d.year === currentYear && 
