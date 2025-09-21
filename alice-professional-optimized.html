@@ -861,6 +861,17 @@
                 }
             });
             
+            // Find min and max values for dynamic Y-axis scaling
+            const allValues = [...povertyData, ...aliceDataPoints, ...combinedData].filter(v => v !== null);
+            const minValue = Math.min(...allValues);
+            const maxValue = Math.max(...allValues);
+            
+            // Calculate Y-axis range with some padding
+            const range = maxValue - minValue;
+            const padding = range * 0.1; // 10% padding
+            const yMin = Math.max(0, Math.floor(minValue - padding));
+            const yMax = Math.min(100, Math.ceil(maxValue + padding));
+            
             // Show the trend panel
             document.getElementById('trendPanel').style.display = 'block';
             document.getElementById('countyName').textContent = `${countyName}, ${stateName}`;
@@ -926,12 +937,13 @@
                     },
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            max: 100,
+                            min: yMin,
+                            max: yMax,
                             ticks: {
                                 callback: function(value) {
                                     return value + '%';
-                                }
+                                },
+                                stepSize: Math.ceil((yMax - yMin) / 5) // Aim for about 5 tick marks
                             }
                         }
                     }
