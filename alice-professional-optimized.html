@@ -1173,7 +1173,7 @@
             
             const tbody = document.querySelector('#rankingsTable tbody');
             tbody.innerHTML = sorted.map(d => `
-                <tr onclick="selectCounty('${d.geoID}')" style="cursor: pointer;">
+                <tr onclick="selectCounty('${d.geoID}', true)" style="cursor: pointer;">
                     <td>${d.county}</td>
                     <td>${d.state}</td>
                     <td><strong>${parseFloat(d.combinedRate || 0).toFixed(1)}%</strong></td>
@@ -1182,9 +1182,12 @@
         }
         
         // Select county
-        function selectCounty(geoID) {
+        function selectCounty(geoID, fromTableClick = false) {
             const data = dataCache.get(`${geoID}_${currentYear}`);
             if (!data) return;
+            
+            // Store previous state to check if we're staying in the same state
+            const previousState = currentState;
             
             currentCounty = geoID;
             currentState = data.state;
@@ -1194,17 +1197,126 @@
             updateCountyDropdown(data.state);
             document.getElementById('countySelect').value = geoID;
             
-            // Find and click county on map if loaded
+            // Find and highlight county on map if loaded
             if (countyLayer) {
                 countyLayer.eachLayer(layer => {
                     const fips = layer.feature.properties.STATE + layer.feature.properties.COUNTY;
                     if (fips === String(geoID)) {
-                        layer.fire('click');
+                        // Manually trigger all the updates that onCountyClick does
+                        // Remove previous highlight
+                        if (selectedCountyLayer) {
+                            selectedCountyLayer.setStyle({
+                                weight: 0.5,
+                                color: 'white',
+                                dashArray: ''
+                            });
+                        }
+                        
+                        // Add yellow highlight to selected county
+                        layer.setStyle({
+                            weight: 3,
+                            color: '#FFD700',
+                            dashArray: '',
+                            fillOpacity: 0.8
+                        });
+                        selectedCountyLayer = layer;
+                        
+                        // Create and open popup
+                        const popupContent = `
+                            <div class="popup-content">
+                                <div class="popup-title">${data.county}, ${data.state}</div>
+                                <div class="popup-stats">
+                                    <div class="popup-stat">
+                                        <div class="popup-stat-label">Poverty</div>
+                                        <div class="popup-stat-value" style="color: #ef4444">
+                                            ${parseFloat(data.povertyRate || 0).toFixed(1)}%
+                                        </div>
+                                        <div style="font-size: 0.65rem; color: #64748b;">
+                                            ${(data.povertyHouseholds || 0).toLocaleString()} HH
+                                        </div>
+                                    </div>
+                                    <div class="popup-stat">
+                                        <div class="popup-stat-label">ALICE</div>
+                                        <div class="popup-stat-value" style="color: #fbbf24">
+                                            ${parseFloat(data.aliceRate || 0).toFixed(1)}%
+                                        </div>
+                                        <div style="font-size: 0.65rem; color: #64748b;">
+                                            ${(data.aliceHouseholds || 0).toLocaleString()} HH
+                                        </div>
+                                    </div>
+                                    <div class="popup-stat">
+                                        <div class="popup-stat-label">Combined</div>
+                                        <div class="popup-stat-value" style="color: #3b82f6">
+                                            ${parseFloat(data.combinedRate || 0).toFixed(1)}%
+                                        </div>
+                                        <div style="font-size: 0.65rem; color: #64748b;">
+                                            ${((data.povertyHouseholds || 0) + (data.aliceHouseholds || 0)).toLocaleString()} HH
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+                                    Total: <strong style="color: #1f2937;">${(data.totalHouseholds || 0).toLocaleString()} households</strong>
+                                </div>
+                            </div>
+                        `;
+                        
+                        layer.bindPopup(popupContent).openPopup();
+                        
+                        // Zoom to county
+                        map.fitBounds(layer.getBounds(), { padding: [50, 50], maxZoom: 10 });
                     }
                 });
             }
             
-            updateView();
+            // Show trend chart
+            showTrendChart(geoID, data.county, data.state);
+            
+            // Update key metrics for selected county
+            updateKeyMetricsForCounty(data);
+            
+            // Only update the table if we're not already viewing the same state's counties
+            // or if this is not from a table click (which means we're already viewing the right list)
+            if (!fromTableClick || previousState !== data.state) {
+                // Update the top counties table to show only this state
+                const stateFiltered = aliceData.filter(d => 
+                    d.year === currentYear && 
+                    d.geoLevel === 'county' &&
+                    d.state === data.state
+                );
+                
+                // Update table header to show the state
+                document.getElementById('topCountiesHeader').textContent = 
+                    `Top Counties by Need - ${data.state}`;
+                
+                // Sort and update table
+                const sorted = [...stateFiltered].sort((a, b) => 
+                    parseFloat(b.combinedRate || 0) - parseFloat(a.combinedRate || 0)
+                );
+                updateTable(sorted.slice(0, 20));
+            }
+            
+            // Update state focus on map
+            if (countyLayer) {
+                countyLayer.eachLayer(layer => {
+                    const layerData = dataCache.get(`${layer.feature.properties.STATE}${layer.feature.properties.COUNTY}_${currentYear}`);
+                    if (layerData) {
+                        if (layerData.state === data.state) {
+                            // Counties in selected state - normal style
+                            if (layer !== selectedCountyLayer) {
+                                layer.setStyle(getStyle(layer.feature));
+                            }
+                            layer.setStyle({ opacity: 1, fillOpacity: 0.7 });
+                        } else {
+                            // Counties in other states - grayed out
+                            layer.setStyle({ 
+                                fillColor: '#d1d5db',
+                                opacity: 0.3, 
+                                fillOpacity: 0.3 
+                            });
+                        }
+                    }
+                });
+            }
         }
         
         // Search with debounce
