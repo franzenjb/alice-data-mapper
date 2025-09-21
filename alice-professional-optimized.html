@@ -461,19 +461,19 @@
                 </div>
             </div>
             
-            <div class="panel">
-                <div class="panel-header">Export Data</div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="secondary" onclick="exportCSV()">CSV</button>
-                    <button class="secondary" onclick="exportJSON()">JSON</button>
-                </div>
-            </div>
-            
             <div class="panel" id="trendPanel" style="display: none; overflow: hidden;">
                 <div class="panel-header">County Trends</div>
                 <div id="countyName" style="font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 1.1rem;"></div>
                 <div style="position: relative; height: 200px; width: 100%; overflow: hidden;">
                     <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">Export Data</div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="secondary" onclick="exportCSV()">CSV</button>
+                    <button class="secondary" onclick="exportJSON()">JSON</button>
                 </div>
             </div>
         </div>
@@ -700,6 +700,28 @@
             
             // Show trend chart
             showTrendChart(fips, data.county, data.state);
+            
+            // Update key metrics for selected county
+            updateKeyMetricsForCounty(data);
+        }
+        
+        // Update key metrics for selected county
+        function updateKeyMetricsForCounty(countyData) {
+            document.getElementById('countyCount').textContent = '1';
+            document.getElementById('avgCombined').textContent = 
+                parseFloat(countyData.combinedRate || 0).toFixed(1) + '%';
+            document.getElementById('totalHouseholds').textContent = 
+                (countyData.totalHouseholds || 0).toLocaleString();
+            
+            const struggling = (countyData.povertyHouseholds || 0) + (countyData.aliceHouseholds || 0);
+            document.getElementById('strugglingHouseholds').textContent = 
+                struggling.toLocaleString();
+                
+            // Update the header to show selected county
+            const headerText = document.querySelector('.panel-header');
+            if (headerText && headerText.textContent === 'Key Metrics') {
+                headerText.textContent = `Key Metrics - ${countyData.county}, ${countyData.state}`;
+            }
         }
         
         // Show trend chart for selected county
@@ -860,6 +882,12 @@
                 selectedCountyLayer = null;
             }
             document.getElementById('trendPanel').style.display = 'none';
+            
+            // Reset key metrics header
+            const metricsHeader = document.querySelector('.panel-header');
+            if (metricsHeader && metricsHeader.textContent.includes(' - ')) {
+                metricsHeader.textContent = 'Key Metrics';
+            }
             
             // Filter data
             let filtered = aliceData.filter(d => 
