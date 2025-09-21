@@ -214,15 +214,29 @@
             padding: 0.75rem 1.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
         
         .metrics-bar .metric {
             text-align: center;
-            flex: 1;
-            padding: 0 1rem;
+            padding: 0 0.5rem;
             border-right: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        
+        .metrics-bar .metric:first-child,
+        .metrics-bar .metric:nth-child(2) {
+            flex: 0 0 auto;
+            min-width: 80px;
+        }
+        
+        .metrics-bar .metric:nth-child(3),
+        .metrics-bar .metric:nth-child(4),
+        .metrics-bar .metric:nth-child(5) {
+            flex: 1 1 auto;
+            min-width: 120px;
         }
         
         .metrics-bar .metric:last-child {
